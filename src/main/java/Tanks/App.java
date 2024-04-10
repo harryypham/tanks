@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class App extends PApplet {
 
@@ -43,6 +44,7 @@ public class App extends PApplet {
     private int[] pixels = new int[896];
     private int[] trees = new int[896];
     private Wind wind;
+    private ArrayList<Tank> tanks = new ArrayList<Tank>();
 
     private String[][] terrain = new String[BOARD_HEIGHT][BOARD_WIDTH];
 
@@ -72,6 +74,25 @@ public class App extends PApplet {
         JSONObject json = loadJSONObject(configPath);
 
         JSONArray tempArr = json.getJSONArray("levels");
+        JSONObject tempPlayer = json.getJSONObject("player_colours");
+
+        Iterator<?> iter = tempPlayer.keys().iterator();
+        String currKey;
+        int[] colors = new int[3];
+        while (iter.hasNext()) {
+            currKey = (String) iter.next();
+
+            String[] colorString = tempPlayer.getString(currKey).split(",", -1);
+            if (colorString[0].equals("random")) {
+                continue;
+            }
+
+            for (int i = 0; i < colorString.length; i++) {
+                colors[i] = Integer.parseInt(colorString[i]);
+                // System.out.print(colors[i]);
+            }
+            tanks.add(new Tank(currKey.charAt(0), colors));
+        }
 
         // Save levels into Object[] levels
         this.levels = new JSONObject[tempArr.size()];
@@ -114,10 +135,10 @@ public class App extends PApplet {
                 for (int c = 0; c < line.length(); c++) {
                     if (line.charAt(c) == 'X') {
                         for (int i = 0; i < 32; i++) {
-                            System.out.println(HEIGHT - (lineIdx - 1) * 32);
+                            // System.out.println(HEIGHT - (lineIdx - 1) * 32);
                             pixels[c * 32 + i] = HEIGHT - (lineIdx - 1) * 32;
                         }
-                        System.out.printf("Line: %d, Col: %d \n", lineIdx, c);
+                        // System.out.printf("Line: %d, Col: %d \n", lineIdx, c);
                     }
                     if (line.charAt(c) == 'T') {
                         trees[c * 32] = 1;
@@ -184,6 +205,7 @@ public class App extends PApplet {
 
         background(backgroundImg);
         wind.draw(this);
+
         this.noStroke();
         String temp = this.levels[this.currentLevelIdx].getString("foreground-colour");
         String[] colors = temp.split(",", -1);
@@ -195,6 +217,10 @@ public class App extends PApplet {
             if (trees[c] == 1) {
                 image(treeImg, c - 16, 640 - pixels[c] - 30, 32, 32);
             }
+        }
+
+        for (Tank tank : tanks) {
+            tank.draw(this);
         }
 
         // ----------------------------------
