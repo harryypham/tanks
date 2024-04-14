@@ -87,7 +87,7 @@ public class Config {
             for (int i = 0; i < temp.length; i++) {
                 colors[i] = Integer.parseInt(temp[i]);
             }
-            playerColor.put(currKey.charAt(0), colors);
+            playerColor.put(currKey.charAt(0), colors.clone());
         }
         return playerColor;
     }

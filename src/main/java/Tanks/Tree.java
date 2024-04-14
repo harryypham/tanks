@@ -3,17 +3,19 @@ package Tanks;
 import processing.core.PImage;
 
 public class Tree {
-    private PImage treeImg;
-    private int x, y;
+    private static PImage treeImg;
+    private Column col;
 
-    public Tree(int x, int y, PImage treeImg) {
-        this.x = x;
-        this.y = y;
-        this.treeImg = treeImg;
+    public Tree(Column col) {
+        this.col = col;
+    }
+
+    public static void setImg(PImage defaultImg) {
+        treeImg = defaultImg;
     }
 
     public void draw(App app) {
-        app.image(treeImg, x - 16, 640 - y - 30, 32, 32);
+        app.image(treeImg, col.getX() - 16, 640 - col.getY() - 30, 32, 32);
     }
 
 }

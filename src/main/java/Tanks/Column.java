@@ -3,14 +3,27 @@ package Tanks;
 public class Column {
     private int x, y;
     private Tree tree;
+    private Tank tank;
 
     public Column(int x, int y) {
         this.x = x;
         this.y = y; // height
     }
 
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
+    }
+
     public void addTree(Tree tree) {
         this.tree = tree;
+    }
+
+    public void addTank(Tank tank) {
+        this.tank = tank;
     }
 
     public void draw(App app) {
