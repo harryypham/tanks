@@ -14,7 +14,6 @@ import java.awt.image.BufferedImage;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class App extends PApplet {
 
@@ -37,16 +36,15 @@ public class App extends PApplet {
     public static Random random = new Random();
 
     // Additional attributes
+    private Config config;
     private JSONObject[] levels;
-    private int currentLevelIdx = 0;
     private PImage backgroundImg;
     private PImage treeImg;
-    private int[] pixels = new int[896];
-    private int[] trees = new int[896];
+    private int[] foregroundColor;
+    private Column[] columns = new Column[WIDTH];
+    private Tree[] trees = new Tree[WIDTH];
     private Wind wind;
     private ArrayList<Tank> tanks = new ArrayList<Tank>();
-
-    private String[][] terrain = new String[BOARD_HEIGHT][BOARD_WIDTH];
 
     // Feel free to add any additional methods or attributes you want. Please put
     // classes in different files.
@@ -73,94 +71,42 @@ public class App extends PApplet {
         // See PApplet javadoc:
         JSONObject json = loadJSONObject(configPath);
 
-        JSONArray tempArr = json.getJSONArray("levels");
-        JSONObject tempPlayer = json.getJSONObject("player_colours");
-
-        Iterator<?> iter = tempPlayer.keys().iterator();
-        String currKey;
-        int[] colors = new int[3];
-        while (iter.hasNext()) {
-            currKey = (String) iter.next();
-
-            String[] colorString = tempPlayer.getString(currKey).split(",", -1);
-            if (colorString[0].equals("random")) {
-                continue;
-            }
-
-            for (int i = 0; i < colorString.length; i++) {
-                colors[i] = Integer.parseInt(colorString[i]);
-                // System.out.print(colors[i]);
-            }
-            tanks.add(new Tank(currKey.charAt(0), colors));
-        }
-
-        // Save levels into Object[] levels
-        this.levels = new JSONObject[tempArr.size()];
-        for (int i = 0; i < tempArr.size(); i++) {
-            this.levels[i] = (JSONObject) tempArr.get(i);
-        }
+        config = new Config(json, this);
 
         // Background
-        String backgroundImgPath = "build/resources/main/Tanks/"
-                + this.levels[this.currentLevelIdx].getString("background");
-        backgroundImg = loadImage(backgroundImgPath);
+        backgroundImg = config.getBackground();
+
+        // Foreground
+        foregroundColor = config.getForegroundColor();
 
         // Tree
-        String treeImgPath;
-        if (this.levels[this.currentLevelIdx].getString("trees") == null) {
-            treeImgPath = "tree1.png";
-        } else {
-            treeImgPath = this.levels[this.currentLevelIdx].getString("trees");
+        treeImg = config.getTreeImage();
+
+        // Players' color
+        Map<Character, int[]> playersColor = config.getPlayerColors();
+
+        for (Map.Entry<Character, int[]> playerColor : playersColor.entrySet()) {
+            // Printing keys
+            System.out.print(playerColor.getKey() + ":");
+            System.out.println(playerColor.getValue());
         }
-        treeImgPath = "build/resources/main/Tanks/"
-                + treeImgPath;
-        treeImg = loadImage(treeImgPath);
 
         // Wind
         wind = new Wind();
 
-        // Get level and draw terrain
-        String filename = this.levels[this.currentLevelIdx].getString("layout");
-        File file = new File(filename);
+        // Get layout file and initialize game
+        File file = config.getLayoutFile();
+        int[][] temp = getLayout(file);
+        int[] tempColumn = temp[0];
+        int[] tempTree = temp[1];
 
-        int lineIdx = 0;
-        try {
-            Scanner sc = new Scanner(file);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                lineIdx += 1;
-                if (line.length() == 0) {
-                    continue;
-                }
-                for (int c = 0; c < line.length(); c++) {
-                    if (line.charAt(c) == 'X') {
-                        for (int i = 0; i < 32; i++) {
-                            // System.out.println(HEIGHT - (lineIdx - 1) * 32);
-                            pixels[c * 32 + i] = HEIGHT - (lineIdx - 1) * 32;
-                        }
-                        // System.out.printf("Line: %d, Col: %d \n", lineIdx, c);
-                    }
-                    if (line.charAt(c) == 'T') {
-                        trees[c * 32] = 1;
-                    }
-                }
+        for (int i = 0; i < WIDTH; i++) {
+            columns[i] = new Column(i, tempColumn[i]);
+            if (tempTree[i] == 1) {
+                trees[i] = new Tree(i, tempColumn[i], treeImg);
+                columns[i].addTree(trees[i]);
             }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
-        }
-        for (int k = 0; k < 2; k++) {
-            int currSum = 0;
-            for (int i = 1; i < 33; i++) {
-                currSum += pixels[i];
-            }
-            for (int i = 0; i < 864; i++) {
-                pixels[i] = currSum / 32;
-                if (i < 863) {
-                    currSum -= pixels[i + 1];
-                    currSum += pixels[i + 33];
-                }
-            }
+
         }
 
         // System.out.println(this.getClass().getResource());
@@ -202,26 +148,29 @@ public class App extends PApplet {
      */
     @Override
     public void draw() {
-
         background(backgroundImg);
-        wind.draw(this);
 
         this.noStroke();
-        String temp = this.levels[this.currentLevelIdx].getString("foreground-colour");
-        String[] colors = temp.split(",", -1);
-        this.fill(Integer.parseInt(colors[0]), Integer.parseInt(colors[1]), Integer.parseInt(colors[2]));
+        this.fill(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
+
+        // draw columns
         for (int c = 0; c < 864; c++) {
-            this.rect(c, 640 - pixels[c], 1, pixels[c]);
-        }
-        for (int c = 0; c < 864; c++) {
-            if (trees[c] == 1) {
-                image(treeImg, c - 16, 640 - pixels[c] - 30, 32, 32);
-            }
+            columns[c].draw(this);
         }
 
+        // draw trees
+        for (int c = 0; c < 864; c++) {
+            if (trees[c] != null) {
+                trees[c].draw(this);
+            }
+        }
+        // draw tanks
         for (Tank tank : tanks) {
             tank.draw(this);
         }
+
+        // draw wind
+        wind.draw(this);
 
         // ----------------------------------
         // display HUD:
@@ -243,4 +192,50 @@ public class App extends PApplet {
         PApplet.main("Tanks.App");
     }
 
+    private int[][] getLayout(File file) {
+        int[] pixels = new int[896];
+        int[] trees = new int[896];
+
+        int lineIdx = 0;
+        try {
+            Scanner sc = new Scanner(file);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                lineIdx += 1;
+                if (line.length() == 0) {
+                    continue;
+                }
+                for (int c = 0; c < line.length(); c++) {
+                    if (line.charAt(c) == 'X') {
+                        for (int i = 0; i < 32; i++) {
+                            pixels[c * 32 + i] = HEIGHT - (lineIdx - 1) * 32;
+                        }
+                    }
+                    if (line.charAt(c) == 'T') {
+                        trees[c * 32] = 1;
+                    }
+                }
+            }
+            sc.close();
+        } catch (FileNotFoundException e) {
+            System.out.println(e);
+        }
+
+        // moving average twice (sliding window)
+        for (int k = 0; k < 2; k++) {
+            int currSum = 0;
+            for (int i = 1; i < 33; i++) {
+                currSum += pixels[i];
+            }
+            for (int i = 0; i < 864; i++) {
+                pixels[i] = currSum / 32;
+                if (i < 863) {
+                    currSum -= pixels[i + 1];
+                    currSum += pixels[i + 33];
+                }
+            }
+        }
+        int[][] re = { pixels, trees };
+        return re;
+    }
 }
