@@ -27,6 +27,11 @@ public class App extends PApplet {
 
     public static final int FPS = 30;
 
+    public static final int UP = 38;
+    public static final int LEFT = 37;
+    public static final int DOWN = 40;
+    public static final int RIGHT = 39;
+
     public String configPath;
 
     public static Random random = new Random();
@@ -85,7 +90,9 @@ public class App extends PApplet {
         Map<Character, int[]> playersColor = config.getPlayerColors();
 
         // Wind
-        wind = new Wind();
+        PImage posWindImg = config.getPosWindImg();
+        PImage negWindImg = config.getNegWindImg();
+        wind = new Wind(posWindImg, negWindImg);
 
         // Get layout file and initialize game
         File file = config.getLayoutFile();
@@ -106,7 +113,7 @@ public class App extends PApplet {
                 tanks.put(tempTank[i], tank);
                 player.addTank(tank);
                 players.put(tempTank[i], player);
-                columns[i].addTank(tank);
+                columns[i].setTank(tank);
             }
 
         }
@@ -134,7 +141,23 @@ public class App extends PApplet {
      */
     @Override
     public void keyPressed(KeyEvent event) {
+        if (event.getKeyCode() == LEFT) {
+            Column new_col = columns[tanks.get(currentPlayer).getX() - 1];
+            tanks.get(currentPlayer).changeCol(new_col);
+        }
 
+        if (event.getKeyCode() == RIGHT) {
+            Column new_col = columns[tanks.get(currentPlayer).getX() + 1];
+            tanks.get(currentPlayer).changeCol(new_col);
+        }
+
+        if (event.getKeyCode() == UP) {
+            tanks.get(currentPlayer).changeDeg(3);
+        }
+
+        if (event.getKeyCode() == DOWN) {
+            tanks.get(currentPlayer).changeDeg(-3);
+        }
     }
 
     /**

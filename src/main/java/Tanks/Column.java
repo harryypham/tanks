@@ -22,7 +22,7 @@ public class Column {
         this.tree = tree;
     }
 
-    public void addTank(Tank tank) {
+    public void setTank(Tank tank) {
         this.tank = tank;
     }
 

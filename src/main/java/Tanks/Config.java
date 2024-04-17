@@ -63,6 +63,18 @@ public class Config {
         return treeImg;
     }
 
+    public PImage getPosWindImg() {
+        String windImgPath = "build/resources/main/Tanks/wind.png";
+        PImage windImg = app.loadImage(windImgPath);
+        return windImg;
+    }
+
+    public PImage getNegWindImg() {
+        String windImgPath = "build/resources/main/Tanks/wind-1.png";
+        PImage windImg = app.loadImage(windImgPath);
+        return windImg;
+    }
+
     public int[] getForegroundColor() {
         String temp = this.levels[this.currentLevel].getString("foreground-colour");
         String[] tempColors = temp.split(",", -1);
