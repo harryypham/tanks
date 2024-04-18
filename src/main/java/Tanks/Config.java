@@ -51,6 +51,12 @@ public class Config {
         return backgroundImg;
     }
 
+    public PImage getFuelImage() {
+        String fuelImgPath = "build/resources/main/Tanks/fuel.png";
+        PImage fuelImg = app.loadImage(fuelImgPath);
+        return fuelImg;
+    }
+
     public PImage getTreeImage() {
         String treeImgPath;
         if (this.levels[this.currentLevel].getString("trees") == null) {

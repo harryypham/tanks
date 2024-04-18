@@ -36,4 +36,8 @@ public class Player {
     public void addTank(Tank tank) {
         this.tank = tank;
     }
+
+    public Tank getTank() {
+        return this.tank;
+    }
 }

@@ -40,6 +40,7 @@ public class App extends PApplet {
     private Config config;
     private PImage backgroundImg;
     private PImage treeImg;
+    private PImage fuelImg;
     private int[] foregroundColor;
     private Column[] columns = new Column[WIDTH];
     private Tree[] trees = new Tree[WIDTH];
@@ -85,6 +86,9 @@ public class App extends PApplet {
         // Tree
         treeImg = config.getTreeImage();
         Tree.setImg(treeImg);
+
+        // Fuel
+        fuelImg = config.getFuelImage();
 
         // Players' color
         Map<Character, int[]> playersColor = config.getPlayerColors();
@@ -136,27 +140,40 @@ public class App extends PApplet {
         // " "));
     }
 
+    public Column[] getColumns() {
+        return this.columns;
+    }
+
     /**
      * Receive key pressed signal from the keyboard.
      */
     @Override
     public void keyPressed(KeyEvent event) {
         if (event.getKeyCode() == LEFT) {
-            Column new_col = columns[tanks.get(currentPlayer).getX() - 1];
-            tanks.get(currentPlayer).changeCol(new_col);
+            if (tanks.get(currentPlayer).getFuel() > 0) {
+                Column new_col = columns[tanks.get(currentPlayer).getX() - 2];
+                tanks.get(currentPlayer).changeCol(new_col);
+            }
         }
-
         if (event.getKeyCode() == RIGHT) {
-            Column new_col = columns[tanks.get(currentPlayer).getX() + 1];
-            tanks.get(currentPlayer).changeCol(new_col);
+            if (tanks.get(currentPlayer).getFuel() > 0) {
+                Column new_col = columns[tanks.get(currentPlayer).getX() + 2];
+                tanks.get(currentPlayer).changeCol(new_col);
+            }
         }
 
         if (event.getKeyCode() == UP) {
-            tanks.get(currentPlayer).changeDeg(3);
+            tanks.get(currentPlayer).changeDeg((float) 0.1);
         }
 
         if (event.getKeyCode() == DOWN) {
-            tanks.get(currentPlayer).changeDeg(-3);
+            tanks.get(currentPlayer).changeDeg((float) -0.1);
+        }
+        if (event.getKeyCode() == 32) {
+            System.out.print("hiii");
+            tanks.get(currentPlayer).fire(wind.getWind());
+            currentPlayer = players.get(currentPlayer).getNextPlayer();
+            wind.changeWind();
         }
     }
 
@@ -213,6 +230,26 @@ public class App extends PApplet {
         fill(0, 0, 0);
         textSize(16);
         text(String.format("Player %c's turn", currentPlayer), 130, 30);
+
+        // draw fuel
+        image(fuelImg, 150, 10, 25, 25);
+        fill(0, 0, 0);
+        textSize(16);
+        textAlign(39);
+        text(players.get(currentPlayer).getTank().getFuel(), 150 + 60, 30);
+
+        // draw health
+        fill(0, 0, 0);
+        textSize(16);
+        textAlign(39);
+        text("Health:", 400, 30);
+        stroke(0, 0, 0);
+        strokeWeight(2);
+        fill(players.get(currentPlayer).getColor()[0], players.get(currentPlayer).getColor()[1],
+                players.get(currentPlayer).getColor()[2]);
+        rect(400 + 10, 10, 200, 30);
+        fill(0, 0, 0);
+        text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);
 
         // draw scoreboard
         fill(0, 1);

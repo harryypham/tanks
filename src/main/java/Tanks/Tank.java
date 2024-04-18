@@ -1,11 +1,18 @@
 package Tanks;
 
+import processing.core.PImage;
 import processing.core.PShape;
 
 public class Tank {
     private Column col;
     private static final float PI = 3.1415927410125732f;
+    private static PImage fuelImg;
     private float turretAngle = 0;
+    private int turretPower = 1;
+    private int health;
+    private int fuel;
+    private int power;
+    private Bullet bullet;
     private Player player;
     private int[] color;
     private static float BASE_WIDTH = 25;
@@ -18,6 +25,13 @@ public class Tank {
         this.player = player;
         this.color = player.getColor();
         this.col = col;
+        this.health = 100;
+        this.fuel = 250;
+        this.power = 50;
+    }
+
+    public static void setFuelImg(PImage img) {
+        fuelImg = img;
     }
 
     public int getX() {
@@ -28,42 +42,62 @@ public class Tank {
         return this.col.getY();
     }
 
+    public void deleteBullet() {
+        bullet = null;
+    }
+
     public Column getCol() {
         return this.col;
     }
 
+    public int getFuel() {
+        return this.fuel;
+    }
+
+    public int getHealth() {
+        return this.health;
+    }
+
+    public int getPower() {
+        return this.power;
+    }
+
     public void changeCol(Column col) {
+        this.fuel -= 2;
         this.col.setTank(null);
         this.col = col;
     }
 
-    public void changeDeg(int deg) {
+    public void changeDeg(float deg) {
         this.turretAngle += deg;
     }
 
+    public void fire(int wind) {
+        bullet = new Bullet(this, col.getX(), 642 - col.getY(), (float) turretAngle, wind);
+    }
+
     public void draw(App app) {
+        if (bullet != null) {
+            bullet.draw(app);
+        }
         int x = col.getX();
         int y = 642 - col.getY();
         app.rectMode(3);
+
+        // Fuel
+        // app.image(fuelImg, 150, 10, 25, 25);
+        // app.fill(0, 0, 0);
+        // app.textSize(16);
+        // app.textAlign(39);
+        // app.text(this.fuel, 150 + 60, 30);
 
         // Turret
         app.fill(0, 0, 0);
         app.pushMatrix();
         app.translate(x, y);
-        app.rotate(app.radians(this.turretAngle));
-        app.rect(0, -TURRET_HEIGHT / 2 - 3, TURRET_WIDTH, TURRET_HEIGHT, BORDER_RADIUS);
+        app.rotate(this.turretAngle);
+        app.rect(0, -TURRET_HEIGHT / 2 - 5, TURRET_WIDTH, TURRET_HEIGHT - 3, BORDER_RADIUS);
         app.popMatrix();
-
-        // PShape square = app.createShape(30, 0, 0, TURRET_WIDTH, TURRET_HEIGHT,
-        // BORDER_RADIUS);
-        // square.rotate(app.radians(this.turretAngle));
-        // square.translate(-TURRET_WIDTH / 2, -TURRET_HEIGHT / 2);
-        // app.shape(square, x + TURRET_WIDTH / 2, y - (float) (TURRET_HEIGHT * 0.5) +
-        // TURRET_HEIGHT / 2);
-
-        // app.fill(0, 0, 0);
-        // app.rect(x, y - (float) (TURRET_HEIGHT * 0.5), TURRET_WIDTH, TURRET_HEIGHT,
-        // BORDER_RADIUS);
 
         // Base
         app.rectMode(3);

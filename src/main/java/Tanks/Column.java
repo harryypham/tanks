@@ -14,6 +14,10 @@ public class Column {
         return this.x;
     }
 
+    public void decreseY(int val) {
+        this.y -= val;
+    }
+
     public int getY() {
         return this.y;
     }
