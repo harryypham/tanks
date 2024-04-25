@@ -26,6 +26,10 @@ public class Column {
         this.tree = tree;
     }
 
+    public Tank getTank() {
+        return this.tank;
+    }
+
     public void setTank(Tank tank) {
         this.tank = tank;
     }

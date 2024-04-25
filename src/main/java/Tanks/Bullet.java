@@ -3,24 +3,29 @@ package Tanks;
 public class Bullet {
     private static float GRAVITY = 3.6f;
     private Tank tank;
+    private int bulletIdx;
+    private ExplodeAnimation explodeAnimation;
     private float x, y, deg;
-    private float velocity = 6;
+    private float velocity = 1;
     private int wind;
     private final double xChange;
     private boolean moving = true;
     private boolean display = false;
-    private int dummy = 5;
+    private int dummy = 12;
 
-    private float r1, r2, r3;
-
-    public Bullet(Tank tank, float x, float y, float deg, int wind) {
+    public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind) {
         this.tank = tank;
+        this.bulletIdx = bulletIdx;
         this.x = (float) (x + 10 * Math.tan(deg));
         this.y = y - 10;
         this.deg = deg;
         this.wind = wind;
+        this.velocity = power;
         this.xChange = this.velocity * Math.tan(deg);
-        System.out.println(wind);
+    }
+
+    public int calculateDistance(int x1, int x2, int y1, int y2) {
+        return (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
     public int calculateHeightDiff(int diff_x) {
@@ -43,6 +48,11 @@ public class Bullet {
                 continue;
             }
             calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin));
+            if (columns[i].getTank() != null) {
+                int tankDistFromExplosion = calculateDistance(i, x_origin, columns[i].getY(), y_origin);
+                System.out.println(tankDistFromExplosion);
+                columns[i].getTank().changeHealth(60 * tankDistFromExplosion / 30);
+            }
         }
 
     }
@@ -54,7 +64,8 @@ public class Bullet {
             if (this.dummy > 0) {
                 this.dummy -= 1;
             } else {
-                x += wind * 0.03;
+                x += wind * 0.03 / 30;
+                velocity -= GRAVITY / 30;
             }
         }
         if (this.x < 0 || this.x >= 864 || this.y < 0 || this.y >= 640) {
@@ -67,29 +78,16 @@ public class Bullet {
         }
 
         if (this.display) {
-            r1 += 5;
-            r2 += 2.5;
-            r3 += 1;
-            if (r1 > 30) {
-                tank.deleteBullet();
+            boolean finish = explodeAnimation.draw(app);
+            if (finish) {
+                tank.deleteBullet(bulletIdx);
             }
-            app.fill(255, 0, 0);
-            app.ellipse(this.x, this.y, r1 * 2, r1 * 2);
-            app.fill(255, 127, 80);
-            app.ellipse(this.x, this.y, r2 * 2, r2 * 2);
-            app.fill(255, 215, 0);
-            app.ellipse(this.x, this.y, r3 * 2, r3 * 2);
         }
 
-        velocity -= 0.12;
         if (this.moving && this.y >= 640 - app.getColumns()[Math.round(this.x)].getY()) {
-            System.out.println(Math.round(this.x));
-            System.out.println(app.getColumns()[Math.round(this.x)].getY());
             this.moving = false;
             this.display = true;
-            r1 = 0;
-            r2 = 0;
-            r3 = 0;
+            this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
             explode(app.getColumns(), Math.round(this.x), app.getColumns()[Math.round(this.x)].getY());
         }
     }

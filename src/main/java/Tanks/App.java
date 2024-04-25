@@ -31,6 +31,8 @@ public class App extends PApplet {
     public static final int LEFT = 37;
     public static final int DOWN = 40;
     public static final int RIGHT = 39;
+    public static final int W = 87;
+    public static final int S = 83;
 
     public String configPath;
 
@@ -169,8 +171,16 @@ public class App extends PApplet {
         if (event.getKeyCode() == DOWN) {
             tanks.get(currentPlayer).changeDeg((float) -0.1);
         }
+
+        if (event.getKeyCode() == W) {
+            tanks.get(currentPlayer).changePower((float) 1.2);
+        }
+
+        if (event.getKeyCode() == S) {
+            tanks.get(currentPlayer).changePower((float) -1.2);
+        }
+
         if (event.getKeyCode() == 32) {
-            System.out.print("hiii");
             tanks.get(currentPlayer).fire(wind.getWind());
             currentPlayer = players.get(currentPlayer).getNextPlayer();
             wind.changeWind();
@@ -249,6 +259,7 @@ public class App extends PApplet {
                 players.get(currentPlayer).getColor()[2]);
         rect(400 + 10, 10, 200, 30);
         fill(0, 0, 0);
+        text(tanks.get(currentPlayer).getHealth(), 650, 30);
         text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);
 
         // draw scoreboard

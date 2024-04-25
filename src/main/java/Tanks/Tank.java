@@ -1,5 +1,7 @@
 package Tanks;
 
+import java.util.ArrayList;
+
 import processing.core.PImage;
 import processing.core.PShape;
 
@@ -12,7 +14,8 @@ public class Tank {
     private int health;
     private int fuel;
     private int power;
-    private Bullet bullet;
+    private Bullet[] bullets = new Bullet[100];
+    private int numBullets = 0;
     private Player player;
     private int[] color;
     private static float BASE_WIDTH = 25;
@@ -42,8 +45,8 @@ public class Tank {
         return this.col.getY();
     }
 
-    public void deleteBullet() {
-        bullet = null;
+    public void deleteBullet(int bulletIdx) {
+        bullets[bulletIdx] = null;
     }
 
     public Column getCol() {
@@ -72,13 +75,42 @@ public class Tank {
         this.turretAngle += deg;
     }
 
+    public void changePower(float pow) {
+        this.power += pow;
+        if (this.power > 100) {
+            this.power = 100;
+        }
+        if (this.power < 0) {
+            this.power = 0;
+        }
+        if (this.power > this.health) {
+            this.power = this.health;
+        }
+    }
+
+    public void changeHealth(int health) {
+        this.health -= health;
+        if (this.health < 0) {
+            this.health = 0;
+        }
+        if (this.power > this.health) {
+            this.power = this.health;
+        }
+    }
+
     public void fire(int wind) {
-        bullet = new Bullet(this, col.getX(), 642 - col.getY(), (float) turretAngle, wind);
+        Bullet bullet = new Bullet(this, numBullets, col.getX(), 642 - col.getY(), (float) turretAngle,
+                (float) (power / 12.5 + 1),
+                wind);
+        bullets[numBullets] = bullet;
+        numBullets += 1;
     }
 
     public void draw(App app) {
-        if (bullet != null) {
-            bullet.draw(app);
+        for (Bullet bullet : bullets) {
+            if (bullet != null) {
+                bullet.draw(app);
+            }
         }
         int x = col.getX();
         int y = 642 - col.getY();
