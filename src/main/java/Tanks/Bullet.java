@@ -8,12 +8,13 @@ public class Bullet {
     private float x, y, deg;
     private float velocity = 1;
     private int wind;
+    private int[] color;
     private final double xChange;
     private boolean moving = true;
     private boolean display = false;
     private int dummy = 12;
 
-    public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind) {
+    public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind, int[] color) {
         this.tank = tank;
         this.bulletIdx = bulletIdx;
         this.x = (float) (x + 10 * Math.tan(deg));
@@ -22,9 +23,11 @@ public class Bullet {
         this.wind = wind;
         this.velocity = power;
         this.xChange = this.velocity * Math.tan(deg);
+        this.color = color;
     }
 
     public int calculateDistance(int x1, int x2, int y1, int y2) {
+        System.out.printf("x1: %d, x2: %d, y1: %d, y2: %d", x1, x2, y1, y2);
         return (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
@@ -47,12 +50,13 @@ public class Bullet {
             if (i < 0 || i >= 864) {
                 continue;
             }
-            calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin));
             if (columns[i].getTank() != null) {
                 int tankDistFromExplosion = calculateDistance(i, x_origin, columns[i].getY(), y_origin);
-                System.out.println(tankDistFromExplosion);
-                columns[i].getTank().changeHealth(60 * tankDistFromExplosion / 30);
+                if (tankDistFromExplosion < 30) {
+                    columns[i].getTank().changeHealth(60 * (30 - tankDistFromExplosion) / 30);
+                }
             }
+            calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin));
         }
 
     }
@@ -73,7 +77,7 @@ public class Bullet {
             this.display = false;
         }
         if (this.moving) {
-            app.fill(0, 0, 0);
+            app.fill(color[0], color[1], color[2]);
             app.ellipse(x, y, 7, 7);
         }
 

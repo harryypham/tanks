@@ -92,6 +92,10 @@ public class App extends PApplet {
         // Fuel
         fuelImg = config.getFuelImage();
 
+        // Parachute
+        PImage parachuteImg = config.getParachuteImage();
+        Tank.setParachuteImg(parachuteImg);
+
         // Players' color
         Map<Character, int[]> playersColor = config.getPlayerColors();
 
@@ -255,9 +259,14 @@ public class App extends PApplet {
         text("Health:", 400, 30);
         stroke(0, 0, 0);
         strokeWeight(2);
+        fill(255, 255, 255);
+        rect(400 + 10, 10, 200, 30);
         fill(players.get(currentPlayer).getColor()[0], players.get(currentPlayer).getColor()[1],
                 players.get(currentPlayer).getColor()[2]);
-        rect(400 + 10, 10, 200, 30);
+        rect(400 + 10, 10, tanks.get(currentPlayer).getHealth() * 2, 30);
+        stroke(211, 211, 211);
+        strokeWeight(3);
+        rect(400 + 10, 10, tanks.get(currentPlayer).getPower() * 2, 30);
         fill(0, 0, 0);
         text(tanks.get(currentPlayer).getHealth(), 650, 30);
         text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);

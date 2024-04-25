@@ -7,17 +7,20 @@ import processing.core.PShape;
 
 public class Tank {
     private Column col;
+    private int x, y;
     private static final float PI = 3.1415927410125732f;
-    private static PImage fuelImg;
     private float turretAngle = 0;
     private int turretPower = 1;
     private int health;
     private int fuel;
     private int power;
+    private int parachutes;
+    private boolean useParachute;
     private Bullet[] bullets = new Bullet[100];
     private int numBullets = 0;
     private Player player;
     private int[] color;
+    private static PImage parachuteImg;
     private static float BASE_WIDTH = 25;
     private static float BASE_HEIGHT = 5;
     private static float TURRET_WIDTH = 5;
@@ -28,13 +31,16 @@ public class Tank {
         this.player = player;
         this.color = player.getColor();
         this.col = col;
+        this.x = col.getX();
+        this.y = 642 - col.getY();
         this.health = 100;
         this.fuel = 250;
         this.power = 50;
+        this.parachutes = 0;
     }
 
-    public static void setFuelImg(PImage img) {
-        fuelImg = img;
+    public static void setParachuteImg(PImage img) {
+        parachuteImg = img;
     }
 
     public int getX() {
@@ -65,10 +71,22 @@ public class Tank {
         return this.power;
     }
 
-    public void changeCol(Column col) {
+    public int getParachutes() {
+        return this.parachutes;
+    }
+
+    public void useParachutes() {
+        this.parachutes -= 1;
+        this.useParachute = true;
+    }
+
+    public void changeCol(Column c) {
         this.fuel -= 2;
         this.col.setTank(null);
-        this.col = col;
+        this.col = c;
+        c.setTank(this);
+        this.x = c.getX();
+        this.y = 642 - c.getY();
     }
 
     public void changeDeg(float deg) {
@@ -101,7 +119,7 @@ public class Tank {
     public void fire(int wind) {
         Bullet bullet = new Bullet(this, numBullets, col.getX(), 642 - col.getY(), (float) turretAngle,
                 (float) (power / 12.5 + 1),
-                wind);
+                wind, color);
         bullets[numBullets] = bullet;
         numBullets += 1;
     }
@@ -112,16 +130,21 @@ public class Tank {
                 bullet.draw(app);
             }
         }
-        int x = col.getX();
-        int y = 642 - col.getY();
+        if (this.useParachute) {
+            if (this.y < 642 - col.getY()) {
+                this.y += 2;
+            } else {
+                useParachute = false;
+            }
+        } else {
+            this.y = 642 - col.getY();
+        }
         app.rectMode(3);
 
-        // Fuel
-        // app.image(fuelImg, 150, 10, 25, 25);
-        // app.fill(0, 0, 0);
-        // app.textSize(16);
-        // app.textAlign(39);
-        // app.text(this.fuel, 150 + 60, 30);
+        // Parachute (if use)
+        if (useParachute) {
+            app.image(parachuteImg, x - 32, y - 64, 64, 64);
+        }
 
         // Turret
         app.fill(0, 0, 0);

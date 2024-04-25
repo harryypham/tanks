@@ -51,6 +51,12 @@ public class Config {
         return backgroundImg;
     }
 
+    public PImage getParachuteImage() {
+        String imgPath = "build/resources/main/Tanks/parachute.png";
+        PImage parachuteImg = app.loadImage(imgPath);
+        return parachuteImg;
+    }
+
     public PImage getFuelImage() {
         String fuelImgPath = "build/resources/main/Tanks/fuel.png";
         PImage fuelImg = app.loadImage(fuelImgPath);
