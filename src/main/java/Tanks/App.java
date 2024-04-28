@@ -47,9 +47,11 @@ public class App extends PApplet {
     private Column[] columns = new Column[WIDTH];
     private Tree[] trees = new Tree[WIDTH];
     private Wind wind;
+    private int currentPlayerIdx;
     private char currentPlayer;
     private Map<Character, Tank> tanks = new HashMap<Character, Tank>();
     private Map<Character, Player> players = new HashMap<Character, Player>();
+    private char[] playersTurn;
     // private ArrayList<Tank> tanks = new ArrayList<Tank>();
 
     // Feel free to add any additional methods or attributes you want. Please put
@@ -121,7 +123,7 @@ public class App extends PApplet {
                 Player player = new Player(tempTank[i], playersColor.get(tempTank[i]));
                 Tank tank = new Tank(columns[i], player);
                 tanks.put(tempTank[i], tank);
-                player.addTank(tank);
+                player.setTank(tank);
                 players.put(tempTank[i], player);
                 columns[i].setTank(tank);
             }
@@ -129,21 +131,45 @@ public class App extends PApplet {
         }
 
         Object[] tempArr = players.keySet().toArray();
+        playersTurn = new char[tempArr.length];
         for (int c = 0; c < tempArr.length; c++) {
-            if (c == tempArr.length - 1) {
-                players.get(tempArr[c]).setNextPlayer((char) tempArr[0]);
-                continue;
-            }
-            players.get(tempArr[c]).setNextPlayer((char) tempArr[c + 1]);
+            // if (c == tempArr.length - 1) {
+            // players.get(tempArr[c]).setNextPlayer((char) tempArr[0]);
+            // continue;
+            // }
+            // players.get(tempArr[c]).setNextPlayer((char) tempArr[c + 1]);
+            playersTurn[c] = (char) tempArr[c];
         }
-
-        currentPlayer = (char) tempArr[0];
+        currentPlayerIdx = 0;
+        currentPlayer = playersTurn[0];
 
         // System.out.println(this.getClass().getResource());
         // System.out.println(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20",
         // " "));
         // loadImage(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20",
         // " "));
+    }
+
+    public void nextPlayer() {
+        if (currentPlayerIdx == playersTurn.length - 1) {
+            currentPlayerIdx = 0;
+        } else {
+            currentPlayerIdx += 1;
+        }
+        currentPlayer = playersTurn[currentPlayerIdx];
+        while (currentPlayer == '#') {
+            nextPlayer();
+        }
+        return;
+    }
+
+    public int findPlayerTurnIdx(char key) {
+        for (int i = 0; i < playersTurn.length; i++) {
+            if (playersTurn[i] == key) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public Column[] getColumns() {
@@ -186,7 +212,7 @@ public class App extends PApplet {
 
         if (event.getKeyCode() == 32) {
             tanks.get(currentPlayer).fire(wind.getWind());
-            currentPlayer = players.get(currentPlayer).getNextPlayer();
+            nextPlayer();
             wind.changeWind();
         }
     }
@@ -202,7 +228,8 @@ public class App extends PApplet {
     @Override
     public void mousePressed(MouseEvent e) {
         // TODO - powerups, like repair and extra fuel and teleport
-        currentPlayer = players.get(currentPlayer).getNextPlayer();
+        // currentPlayer = players.get(currentPlayer).getNextPlayer();
+        nextPlayer();
         wind.changeWind();
     }
 
@@ -233,8 +260,25 @@ public class App extends PApplet {
             }
         }
         // draw tanks
-        for (Tank tank : tanks.values()) {
-            tank.draw(this);
+        // for (Tank tank : tanks.values()) {
+        // if (tank.getHealth() > 0) {
+        // tank.draw(this);
+        // } else {
+
+        // }
+
+        // }
+
+        for (Map.Entry<Character, Tank> entry : tanks.entrySet()) {
+            Character key = entry.getKey();
+            Tank tank = entry.getValue();
+            if (tank != null && tank.getHealth() > 0) {
+                tank.draw(this);
+            } else if (tank != null) {
+                tank.deleteTankFromGame();
+                playersTurn[findPlayerTurnIdx(key)] = '#';
+                tanks.replace(key, null);
+            }
         }
 
         // draw wind

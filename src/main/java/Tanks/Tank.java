@@ -36,7 +36,7 @@ public class Tank {
         this.health = 100;
         this.fuel = 250;
         this.power = 50;
-        this.parachutes = 0;
+        this.parachutes = 3;
     }
 
     public static void setParachuteImg(PImage img) {
@@ -122,6 +122,11 @@ public class Tank {
                 wind, color);
         bullets[numBullets] = bullet;
         numBullets += 1;
+    }
+
+    public void deleteTankFromGame() {
+        this.col.setTank(null);
+        this.player.setTank(null);
     }
 
     public void draw(App app) {

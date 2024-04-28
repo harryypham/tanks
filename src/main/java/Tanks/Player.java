@@ -13,13 +13,13 @@ public class Player {
         this.score = 0;
     }
 
-    public char getNextPlayer() {
-        return this.next;
-    }
+    // public char getNextPlayer() {
+    // return this.next;
+    // }
 
-    public void setNextPlayer(char next) {
-        this.next = next;
-    }
+    // public void setNextPlayer(char next) {
+    // this.next = next;
+    // }
 
     public char getChar() {
         return this.player;
@@ -33,7 +33,7 @@ public class Player {
         return this.score;
     }
 
-    public void addTank(Tank tank) {
+    public void setTank(Tank tank) {
         this.tank = tank;
     }
 

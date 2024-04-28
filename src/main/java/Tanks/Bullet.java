@@ -72,7 +72,7 @@ public class Bullet {
                 velocity -= GRAVITY / 30;
             }
         }
-        if (this.x < 0 || this.x >= 864 || this.y < 0 || this.y >= 640) {
+        if (this.x <= 0 || Math.round(this.x) >= 864 || this.y <= 0 || this.y >= 640) {
             this.moving = false;
             this.display = false;
         }
