@@ -16,13 +16,6 @@ public class Column {
 
     public void decreseY(int val) {
         this.y -= val;
-        if (this.tank != null) {
-            if (this.tank.getParachutes() > 0) {
-                this.tank.useParachutes();
-            } else {
-                this.tank.changeHealth(val);
-            }
-        }
     }
 
     public int getY() {

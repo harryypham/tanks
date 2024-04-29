@@ -157,7 +157,7 @@ public class App extends PApplet {
             currentPlayerIdx += 1;
         }
         currentPlayer = playersTurn[currentPlayerIdx];
-        while (currentPlayer == '#') {
+        if (currentPlayer == '#') {
             nextPlayer();
         }
         return;
@@ -181,6 +181,7 @@ public class App extends PApplet {
      */
     @Override
     public void keyPressed(KeyEvent event) {
+        System.out.println(currentPlayer);
         if (event.getKeyCode() == LEFT) {
             if (tanks.get(currentPlayer).getFuel() > 0) {
                 Column new_col = columns[tanks.get(currentPlayer).getX() - 2];
@@ -275,9 +276,15 @@ public class App extends PApplet {
             if (tank != null && tank.getHealth() > 0) {
                 tank.draw(this);
             } else if (tank != null) {
-                tank.deleteTankFromGame();
-                playersTurn[findPlayerTurnIdx(key)] = '#';
-                tanks.replace(key, null);
+                if (!tank.checkDeleted()) {
+                    tank.deleteTankFromGame();
+                    playersTurn[findPlayerTurnIdx(key)] = '#';
+                }
+                if (!tank.getDisplay()) {
+                    tanks.replace(key, null);
+                } else {
+                    tank.draw(this);
+                }
             }
         }
 
@@ -294,26 +301,30 @@ public class App extends PApplet {
         fill(0, 0, 0);
         textSize(16);
         textAlign(39);
-        text(players.get(currentPlayer).getTank().getFuel(), 150 + 60, 30);
 
-        // draw health
-        fill(0, 0, 0);
-        textSize(16);
-        textAlign(39);
-        text("Health:", 400, 30);
-        stroke(0, 0, 0);
-        strokeWeight(2);
-        fill(255, 255, 255);
-        rect(400 + 10, 10, 200, 30);
-        fill(players.get(currentPlayer).getColor()[0], players.get(currentPlayer).getColor()[1],
-                players.get(currentPlayer).getColor()[2]);
-        rect(400 + 10, 10, tanks.get(currentPlayer).getHealth() * 2, 30);
-        stroke(211, 211, 211);
-        strokeWeight(3);
-        rect(400 + 10, 10, tanks.get(currentPlayer).getPower() * 2, 30);
-        fill(0, 0, 0);
-        text(tanks.get(currentPlayer).getHealth(), 650, 30);
-        text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);
+        Tank t = players.get(currentPlayer).getTank();
+        if (t != null) {
+            text(t.getFuel(), 150 + 60, 30);
+
+            // draw health
+            fill(0, 0, 0);
+            textSize(16);
+            textAlign(39);
+            text("Health:", 400, 30);
+            stroke(0, 0, 0);
+            strokeWeight(2);
+            fill(255, 255, 255);
+            rect(400 + 10, 10, 200, 30);
+            fill(players.get(currentPlayer).getColor()[0], players.get(currentPlayer).getColor()[1],
+                    players.get(currentPlayer).getColor()[2]);
+            rect(400 + 10, 10, tanks.get(currentPlayer).getHealth() * 2, 30);
+            stroke(211, 211, 211);
+            strokeWeight(3);
+            rect(400 + 10, 10, tanks.get(currentPlayer).getPower() * 2, 30);
+            fill(0, 0, 0);
+            text(tanks.get(currentPlayer).getHealth(), 650, 30);
+            text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);
+        }
 
         // draw scoreboard
         fill(0, 1);

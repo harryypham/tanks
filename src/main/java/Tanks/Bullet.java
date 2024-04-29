@@ -27,7 +27,6 @@ public class Bullet {
     }
 
     public int calculateDistance(int x1, int x2, int y1, int y2) {
-        System.out.printf("x1: %d, x2: %d, y1: %d, y2: %d", x1, x2, y1, y2);
         return (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
@@ -36,13 +35,25 @@ public class Bullet {
     }
 
     public void calculateHeightLoss(Column col, int height_origin, int height_diff) {
+        int val = 0;
         if (col.getY() >= height_origin + height_diff) {
-            col.decreseY((int) Math.round(2 * height_diff));
+            val = (int) Math.round(2 * height_diff);
         } else if (col.getY() >= height_origin) {
-            col.decreseY((int) (height_diff + (col.getY() - height_origin)));
+            val = (int) (height_diff + (col.getY() - height_origin));
         } else if (col.getY() > height_origin - height_diff) {
-            col.decreseY((int) (height_diff - (height_origin - col.getY())));
+            val = (int) (height_diff - (height_origin - col.getY()));
         }
+
+        col.decreseY(val);
+        if (col.getTank() != null) {
+            Tank t = col.getTank();
+            if (t.getParachutes() > 0) {
+                t.useParachutes();
+            } else if (t != this.tank) {
+                t.changeHealth(val, this.tank);
+            }
+        }
+
     }
 
     public void explode(Column[] columns, int x_origin, int y_origin) {
@@ -53,7 +64,12 @@ public class Bullet {
             if (columns[i].getTank() != null) {
                 int tankDistFromExplosion = calculateDistance(i, x_origin, columns[i].getY(), y_origin);
                 if (tankDistFromExplosion < 30) {
-                    columns[i].getTank().changeHealth(60 * (30 - tankDistFromExplosion) / 30);
+                    if (columns[i].getTank() != this.tank) {
+                        columns[i].getTank().changeHealth(60 * (30 - tankDistFromExplosion) / 30, this.tank);
+                    } else {
+                        columns[i].getTank().changeHealth(60 * (30 - tankDistFromExplosion) / 30, null);
+                    }
+
                 }
             }
             calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin));

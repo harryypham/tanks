@@ -20,6 +20,9 @@ public class Tank {
     private int numBullets = 0;
     private Player player;
     private int[] color;
+    private ExplodeAnimation explodeAnimation;
+    private boolean display;
+    private boolean deleted = false;
     private static PImage parachuteImg;
     private static float BASE_WIDTH = 25;
     private static float BASE_HEIGHT = 5;
@@ -59,6 +62,10 @@ public class Tank {
         return this.col;
     }
 
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public int getFuel() {
         return this.fuel;
     }
@@ -73,6 +80,14 @@ public class Tank {
 
     public int getParachutes() {
         return this.parachutes;
+    }
+
+    public boolean getDisplay() {
+        return this.display;
+    }
+
+    public boolean checkDeleted() {
+        return this.deleted;
     }
 
     public void useParachutes() {
@@ -106,10 +121,14 @@ public class Tank {
         }
     }
 
-    public void changeHealth(int health) {
-        this.health -= health;
-        if (this.health < 0) {
-            this.health = 0;
+    public void changeHealth(int health, Tank t) {
+        int val = health;
+        if (this.health < health) {
+            val = this.health;
+        }
+        this.health -= val;
+        if (t != null) {
+            t.getPlayer().score += val;
         }
         if (this.power > this.health) {
             this.power = this.health;
@@ -127,6 +146,9 @@ public class Tank {
     public void deleteTankFromGame() {
         this.col.setTank(null);
         this.player.setTank(null);
+        this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
+        this.display = true;
+        this.deleted = true;
     }
 
     public void draw(App app) {
@@ -144,6 +166,14 @@ public class Tank {
         } else {
             this.y = 642 - col.getY();
         }
+
+        if (this.display) {
+            boolean finish = explodeAnimation.draw(app);
+            if (finish) {
+                this.display = false;
+            }
+        }
+
         app.rectMode(3);
 
         // Parachute (if use)
