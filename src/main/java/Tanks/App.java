@@ -3,12 +3,10 @@ package Tanks;
 import org.checkerframework.checker.units.qual.A;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.data.JSONArray;
 import processing.data.JSONObject;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
-import java.io.*;
 import java.util.*;
 
 public class App extends PApplet {
@@ -27,32 +25,40 @@ public class App extends PApplet {
 
     public static final int FPS = 30;
 
+    public static final int BACKSPACE = 32;
     public static final int UP = 38;
     public static final int LEFT = 37;
     public static final int DOWN = 40;
     public static final int RIGHT = 39;
     public static final int W = 87;
     public static final int S = 83;
+    public static final int F = 70;
+    public static final int R = 82;
+    public static final int P = 80;
 
     public String configPath;
 
-    public static Random random = new Random();
-
     // Additional attributes
+    private int totalLevels;
+    private int level = 0;
     private Config config;
     private PImage backgroundImg;
-    private PImage treeImg;
     private PImage fuelImg;
+    private PImage parachuteImg;
     private int[] foregroundColor;
+    private Wind wind;
+
     private Column[] columns = new Column[WIDTH];
     private Tree[] trees = new Tree[WIDTH];
-    private Wind wind;
-    private int currentPlayerIdx;
-    private char currentPlayer;
     private Map<Character, Tank> tanks = new HashMap<Character, Tank>();
     private Map<Character, Player> players = new HashMap<Character, Player>();
-    private char[] playersTurn;
-    // private ArrayList<Tank> tanks = new ArrayList<Tank>();
+
+    private int currentPlayerIdx;
+    private char currentPlayer;
+    private Character[] playersTurn;
+    private int playersLeft;
+
+    private boolean endgame = false;
 
     // Feel free to add any additional methods or attributes you want. Please put
     // classes in different files.
@@ -76,104 +82,32 @@ public class App extends PApplet {
     @Override
     public void setup() {
         frameRate(FPS);
-        // See PApplet javadoc:
         JSONObject json = loadJSONObject(configPath);
+        config = new Config(json, this, level);
 
-        config = new Config(json, this);
-
-        // Background
+        totalLevels = config.getNumLevels();
         backgroundImg = config.getBackground();
-
-        // Foreground
         foregroundColor = config.getForegroundColor();
 
-        // Tree
-        treeImg = config.getTreeImage();
+        PImage treeImg = config.getTreeImage();
         Tree.setImg(treeImg);
 
-        // Fuel
         fuelImg = config.getFuelImage();
 
-        // Parachute
-        PImage parachuteImg = config.getParachuteImage();
+        parachuteImg = config.getParachuteImage();
         Tank.setParachuteImg(parachuteImg);
 
-        // Players' color
-        Map<Character, int[]> playersColor = config.getPlayerColors();
-
-        // Wind
         PImage posWindImg = config.getPosWindImg();
         PImage negWindImg = config.getNegWindImg();
-        wind = new Wind(posWindImg, negWindImg);
+        Wind.setWindImg(posWindImg, negWindImg);
 
-        // Get layout file and initialize game
-        File file = config.getLayoutFile();
-        int[][] temp = getLayout(file);
-        int[] tempColumn = temp[0];
-        int[] tempTree = temp[1];
-        char[] tempTank = getTanks(file);
+        // Process layout
+        initializeEnv();
 
-        for (int i = 0; i < WIDTH; i++) {
-            columns[i] = new Column(i, tempColumn[i]);
-            if (tempTree[i] == 1) {
-                trees[i] = new Tree(columns[i]);
-                columns[i].addTree(trees[i]);
-            }
-            if (Character.isLetter(tempTank[i])) {
-                Player player = new Player(tempTank[i], playersColor.get(tempTank[i]));
-                Tank tank = new Tank(columns[i], player);
-                tanks.put(tempTank[i], tank);
-                player.setTank(tank);
-                players.put(tempTank[i], player);
-                columns[i].setTank(tank);
-            }
+        // Process players
+        initializePlayers();
 
-        }
-
-        Object[] tempArr = players.keySet().toArray();
-        playersTurn = new char[tempArr.length];
-        for (int c = 0; c < tempArr.length; c++) {
-            // if (c == tempArr.length - 1) {
-            // players.get(tempArr[c]).setNextPlayer((char) tempArr[0]);
-            // continue;
-            // }
-            // players.get(tempArr[c]).setNextPlayer((char) tempArr[c + 1]);
-            playersTurn[c] = (char) tempArr[c];
-        }
-        currentPlayerIdx = 0;
-        currentPlayer = playersTurn[0];
-
-        // System.out.println(this.getClass().getResource());
-        // System.out.println(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20",
-        // " "));
-        // loadImage(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20",
-        // " "));
-    }
-
-    public void nextPlayer() {
-        if (currentPlayerIdx == playersTurn.length - 1) {
-            currentPlayerIdx = 0;
-        } else {
-            currentPlayerIdx += 1;
-        }
-        currentPlayer = playersTurn[currentPlayerIdx];
-        if (currentPlayer == '#') {
-            nextPlayer();
-        }
-        return;
-    }
-
-    public int findPlayerTurnIdx(char key) {
-        for (int i = 0; i < playersTurn.length; i++) {
-            if (playersTurn[i] == key) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public Column[] getColumns() {
-        return this.columns;
+        Bullet.setCol(columns);
     }
 
     /**
@@ -181,40 +115,69 @@ public class App extends PApplet {
      */
     @Override
     public void keyPressed(KeyEvent event) {
-        System.out.println(currentPlayer);
+        Player p = players.get(currentPlayer);
+        Tank t = tanks.get(currentPlayer);
+        if (endgame && event.getKeyCode() == R) {
+            endgame = false;
+            this.level = 0;
+            this.setup();
+        }
+
         if (event.getKeyCode() == LEFT) {
-            if (tanks.get(currentPlayer).getFuel() > 0) {
-                Column new_col = columns[tanks.get(currentPlayer).getX() - 2];
-                tanks.get(currentPlayer).changeCol(new_col);
+            if (t.getFuel() > 0) {
+                Column new_col = columns[t.getX() - 2];
+                t.changeCol(new_col);
             }
         }
+
         if (event.getKeyCode() == RIGHT) {
-            if (tanks.get(currentPlayer).getFuel() > 0) {
-                Column new_col = columns[tanks.get(currentPlayer).getX() + 2];
-                tanks.get(currentPlayer).changeCol(new_col);
+            if (t.getFuel() > 0) {
+                Column new_col = columns[t.getX() + 2];
+                t.changeCol(new_col);
             }
         }
 
         if (event.getKeyCode() == UP) {
-            tanks.get(currentPlayer).changeDeg((float) 0.1);
+            t.changeDeg((float) 0.1);
         }
 
         if (event.getKeyCode() == DOWN) {
-            tanks.get(currentPlayer).changeDeg((float) -0.1);
+            t.changeDeg((float) -0.1);
         }
 
         if (event.getKeyCode() == W) {
-            tanks.get(currentPlayer).changePower((float) 1.2);
+            t.changePower((float) 1.2);
         }
 
         if (event.getKeyCode() == S) {
-            tanks.get(currentPlayer).changePower((float) -1.2);
+            t.changePower((float) -1.2);
         }
 
-        if (event.getKeyCode() == 32) {
-            tanks.get(currentPlayer).fire(wind.getWind());
+        if (event.getKeyCode() == BACKSPACE) {
+            t.fire(wind.getWind());
             nextPlayer();
             wind.changeWind();
+        }
+
+        if (!endgame && event.getKeyCode() == R) {
+            if (p.getScore() >= 20) {
+                t.repair();
+                p.changeScore(-20);
+            }
+        }
+
+        if (event.getKeyCode() == F) {
+            if (p.getScore() >= 10) {
+                t.addFuel();
+                p.changeScore(-10);
+            }
+        }
+
+        if (event.getKeyCode() == P) {
+            if (p.getScore() >= 15) {
+                t.addParachute();
+                p.changeScore(-15);
+            }
         }
     }
 
@@ -230,8 +193,6 @@ public class App extends PApplet {
     public void mousePressed(MouseEvent e) {
         // TODO - powerups, like repair and extra fuel and teleport
         // currentPlayer = players.get(currentPlayer).getNextPlayer();
-        nextPlayer();
-        wind.changeWind();
     }
 
     @Override
@@ -245,10 +206,90 @@ public class App extends PApplet {
     @Override
     public void draw() {
         background(backgroundImg);
+        noStroke();
+        fill(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
 
-        this.noStroke();
-        this.fill(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
+        drawTerrain();
+        drawTanks();
+        drawWind();
+        drawCurrentPlayerStats();
+        drawScoreboard();
 
+        if (endgame) {
+            endGame();
+        } else {
+            checkEndgame();
+        }
+    }
+
+    public static void main(String[] args) {
+        PApplet.main("Tanks.App");
+    }
+
+    /*
+     * Below are helper functions.
+     */
+    public void nextPlayer() {
+        if (playersLeft == 0) {
+            return;
+        }
+        currentPlayerIdx = (currentPlayerIdx == playersTurn.length - 1) ? 0 : currentPlayerIdx + 1;
+        currentPlayer = playersTurn[currentPlayerIdx];
+        if (currentPlayer == '#' || tanks.get(currentPlayer) == null) {
+            nextPlayer();
+        }
+    }
+
+    private int findPlayerIdx(char key) {
+        List<Character> list = Arrays.asList(playersTurn);
+        return list.indexOf(key);
+    }
+
+    private void initializeEnv() {
+        Object[] temp = config.loadLayout();
+        Map<Character, int[]> playersColor = config.getPlayerColors();
+        trees = new Tree[WIDTH];
+        wind = new Wind();
+        int[] tempColumn = (int[]) temp[0];
+        int[] tempTree = (int[]) temp[1];
+        char[] tempTank = (char[]) temp[2];
+
+        for (int i = 0; i < WIDTH; i++) {
+            columns[i] = new Column(i, tempColumn[i]);
+            if (tempTree[i] == 1) {
+                trees[i] = new Tree(columns[i]);
+                columns[i].addTree(trees[i]);
+            }
+            if (Character.isLetter(tempTank[i])) {
+                Player player;
+                if (this.level == 0) {
+                    player = new Player(tempTank[i], playersColor.get(tempTank[i]));
+                } else {
+                    player = players.get(tempTank[i]);
+                }
+                Tank tank = new Tank(columns[i], player);
+                tanks.put(tempTank[i], tank);
+                player.setTank(tank);
+                if (this.level == 0) {
+                    players.put(tempTank[i], player);
+                }
+                columns[i].setTank(tank);
+            }
+        }
+    }
+
+    private void initializePlayers() {
+        Object[] tempArr = players.keySet().toArray();
+        playersTurn = new Character[tempArr.length];
+        for (int c = 0; c < tempArr.length; c++) {
+            playersTurn[c] = (char) tempArr[c];
+        }
+        currentPlayerIdx = 0;
+        currentPlayer = playersTurn[0];
+        playersLeft = playersTurn.length;
+    }
+
+    private void drawTerrain() {
         // draw columns
         for (int c = 0; c < 864; c++) {
             columns[c].draw(this);
@@ -260,25 +301,22 @@ public class App extends PApplet {
                 trees[c].draw(this);
             }
         }
-        // draw tanks
-        // for (Tank tank : tanks.values()) {
-        // if (tank.getHealth() > 0) {
-        // tank.draw(this);
-        // } else {
+    }
 
-        // }
-
-        // }
-
+    private void drawTanks() {
         for (Map.Entry<Character, Tank> entry : tanks.entrySet()) {
             Character key = entry.getKey();
             Tank tank = entry.getValue();
-            if (tank != null && tank.getHealth() > 0) {
+            if (tank == null) {
+                continue;
+            }
+            if (tank.getHealth() > 0) {
                 tank.draw(this);
-            } else if (tank != null) {
+            } else {
                 if (!tank.checkDeleted()) {
                     tank.deleteTankFromGame();
-                    playersTurn[findPlayerTurnIdx(key)] = '#';
+                    playersTurn[findPlayerIdx(key)] = '#';
+                    playersLeft -= 1;
                 }
                 if (!tank.getDisplay()) {
                     tanks.replace(key, null);
@@ -287,50 +325,68 @@ public class App extends PApplet {
                 }
             }
         }
+    }
 
-        // draw wind
+    private void drawWind() {
         wind.draw(this);
+    }
 
-        // draw current player
-        fill(0, 0, 0);
-        textSize(16);
-        text(String.format("Player %c's turn", currentPlayer), 130, 30);
+    private void drawCurrentPlayerStats() {
+        Tank t = tanks.get(currentPlayer);
+        if (t == null) {
+            nextPlayer();
+        }
+        t = tanks.get(currentPlayer);
+        Player p = players.get(currentPlayer);
 
-        // draw fuel
+        // draw fuel image
         image(fuelImg, 150, 10, 25, 25);
-        fill(0, 0, 0);
-        textSize(16);
-        textAlign(39);
 
-        Tank t = players.get(currentPlayer).getTank();
-        if (t != null) {
+        // draw parachute image
+        image(parachuteImg, 150, 40, 25, 25);
+
+        if (playersLeft > 0) {
+            // display current player
+            fill(0, 0, 0);
+            textSize(16);
+            text(String.format("Player %c's turn", currentPlayer), 130, 30);
+
+            // display current player's tank stats (fuel and num of parachutes)
+            textAlign(39);
             text(t.getFuel(), 150 + 60, 30);
+            text(t.getParachutes(), 150 + 40, 60);
 
-            // draw health
             fill(0, 0, 0);
             textSize(16);
             textAlign(39);
             text("Health:", 400, 30);
+
+            // draw health and power bar
             stroke(0, 0, 0);
             strokeWeight(2);
             fill(255, 255, 255);
             rect(400 + 10, 10, 200, 30);
-            fill(players.get(currentPlayer).getColor()[0], players.get(currentPlayer).getColor()[1],
-                    players.get(currentPlayer).getColor()[2]);
-            rect(400 + 10, 10, tanks.get(currentPlayer).getHealth() * 2, 30);
+
+            fill(p.getColor()[0], p.getColor()[1],
+                    p.getColor()[2]);
+            rect(400 + 10, 10, t.getHealth() * 2, 30);
+
             stroke(211, 211, 211);
             strokeWeight(3);
-            rect(400 + 10, 10, tanks.get(currentPlayer).getPower() * 2, 30);
-            fill(0, 0, 0);
-            text(tanks.get(currentPlayer).getHealth(), 650, 30);
-            text(String.format("Power: %d", tanks.get(currentPlayer).getPower()), 400 + 22, 70);
-        }
+            rect(400 + 10, 10, t.getPower() * 2, 30);
 
-        // draw scoreboard
+            // display health and power text
+            fill(0, 0, 0);
+            text(t.getHealth(), 650, 30);
+            text(String.format("Power: %d", t.getPower()), 400 + 22, 70);
+        }
+    }
+
+    private void drawScoreboard() {
         fill(0, 1);
         stroke(0);
         strokeWeight(4);
-        rect(710, 50, 140, 120);
+        rect(710, 50, 140, 120 + (playersTurn.length - 4) * 20);
         fill(0, 0, 0);
         textSize(16);
         text("Scores", 770, 70);
@@ -345,102 +401,45 @@ public class App extends PApplet {
             text(player.getScore(), 840, currY);
             currY += 20;
         }
-
-        // ----------------------------------
-        // display HUD:
-        // ----------------------------------
-        // TODO
-
-        // ----------------------------------
-        // display scoreboard:
-        // ----------------------------------
-        // TODO
-
-        // ----------------------------------
-        // ----------------------------------
-
-        // TODO: Check user action
     }
 
-    public static void main(String[] args) {
-        PApplet.main("Tanks.App");
+    private void checkEndgame() {
+        if (playersLeft <= 1) {
+            if (this.level == totalLevels - 1) {
+                endgame = true;
+                return;
+            }
+            this.level += 1;
+            this.setup();
+        }
     }
 
-    /*
-     * Get and smooth terrain, get tree
-     */
-    private int[][] getLayout(File file) {
-        int[] pixels = new int[896];
-        int[] trees = new int[896];
+    private void endGame() {
+        List<Player> sortedPlayers = new ArrayList<>(players.values());
+        Collections.sort(sortedPlayers);
 
-        int lineIdx = 0;
-        try {
-            Scanner sc = new Scanner(file);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                lineIdx += 1;
-                if (line.length() == 0) {
-                    continue;
-                }
-                for (int c = 0; c < line.length(); c++) {
-                    if (line.charAt(c) == 'X') {
-                        for (int i = 0; i < 32; i++) {
-                            pixels[c * 32 + i] = HEIGHT - (lineIdx - 1) * 32;
-                        }
-                        continue;
-                    }
-                    if (line.charAt(c) == 'T') {
-                        trees[c * 32] = 1;
-                        continue;
-                    }
-                }
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
+        Player winner = sortedPlayers.get(0);
+        int[] color = winner.getColor();
+        fill(color[0], color[1], color[2]);
+        textSize(24);
+        text(String.format("Player %c wins!", winner.getChar()), 390, 180);
+
+        fill(0, 1);
+        stroke(0);
+        strokeWeight(4);
+        rect(215, 200, 400, 170 + (playersTurn.length - 4) * 20);
+        fill(0, 0, 0);
+        text("Final Scores", 360, 230);
+        line(215, 240, 615, 240);
+
+        int y = 270;
+        for (Player p : sortedPlayers) {
+            color = p.getColor();
+            fill(color[0], color[1], color[2]);
+            text(String.format("Player %c", p.getChar()), 315, y);
+            fill(0, 0, 0);
+            text(p.getScore(), 600, y);
+            y += 30;
         }
-
-        // moving average twice (sliding window)
-        for (int k = 0; k < 2; k++) {
-            int currSum = 0;
-            for (int i = 1; i < 33; i++) {
-                currSum += pixels[i];
-            }
-            for (int i = 0; i < 864; i++) {
-                pixels[i] = currSum / 32;
-                if (i < 863) {
-                    currSum -= pixels[i + 1];
-                    currSum += pixels[i + 33];
-                }
-            }
-        }
-        int[][] re = { pixels, trees };
-        return re;
-    }
-
-    /*
-     * Get tank
-     */
-    private char[] getTanks(File file) {
-        char[] tanks = new char[896];
-
-        try {
-            Scanner sc = new Scanner(file);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                if (line.length() == 0) {
-                    continue;
-                }
-                for (int c = 0; c < line.length(); c++) {
-                    if (Character.isLetter(line.charAt(c)) & line.charAt(c) != 'X' & line.charAt(c) != 'T') {
-                        tanks[c * 32] = line.charAt(c);
-                    }
-                }
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
-        }
-        return tanks;
     }
 }

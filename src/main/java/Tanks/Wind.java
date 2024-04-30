@@ -6,15 +6,17 @@ import java.util.*;
 
 public class Wind {
     private int value;
-    private PImage img;
-    private PImage rev_img;
+    private static PImage img;
+    private static PImage rev_img;
     private Random rand = new Random();
-    private Config config;
 
-    public Wind(PImage posImg, PImage negImg) {
+    public Wind() {
         this.value = rand.nextInt(71) - 35; // [-35, 35]
-        this.img = posImg;
-        this.rev_img = negImg;
+    }
+
+    public static void setWindImg(PImage image1, PImage image2) {
+        img = image1;
+        rev_img = image2;
     }
 
     public void changeWind() {
@@ -29,10 +31,10 @@ public class Wind {
 
     public void draw(App app) {
         PImage image;
-        if (value > 0) {
-            image = this.img;
+        if (value >= 0) {
+            image = img;
         } else {
-            image = this.rev_img;
+            image = rev_img;
         }
         app.image(image, 760, 0, 40, 40);
         app.fill(0, 0, 0);

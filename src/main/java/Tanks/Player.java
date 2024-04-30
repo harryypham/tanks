@@ -1,25 +1,16 @@
 package Tanks;
 
-public class Player {
-    char player;
-    char next;
-    int[] color;
-    int score;
-    Tank tank;
+public class Player implements Comparable<Player> {
+    private char player;
+    private int[] color;
+    private int score;
+    private Tank tank;
 
     public Player(char player, int[] color) {
         this.color = color;
         this.player = player;
         this.score = 0;
     }
-
-    // public char getNextPlayer() {
-    // return this.next;
-    // }
-
-    // public void setNextPlayer(char next) {
-    // this.next = next;
-    // }
 
     public char getChar() {
         return this.player;
@@ -33,11 +24,20 @@ public class Player {
         return this.score;
     }
 
+    public void changeScore(int val) {
+        this.score += val;
+    }
+
     public void setTank(Tank tank) {
         this.tank = tank;
     }
 
     public Tank getTank() {
         return this.tank;
+    }
+
+    @Override
+    public int compareTo(Player p) {
+        return Integer.compare(p.getScore(), this.score);
     }
 }

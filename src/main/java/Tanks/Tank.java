@@ -1,16 +1,11 @@
 package Tanks;
 
-import java.util.ArrayList;
-
 import processing.core.PImage;
-import processing.core.PShape;
 
 public class Tank {
     private Column col;
     private int x, y;
-    private static final float PI = 3.1415927410125732f;
     private float turretAngle = 0;
-    private int turretPower = 1;
     private int health;
     private int fuel;
     private int power;
@@ -128,11 +123,26 @@ public class Tank {
         }
         this.health -= val;
         if (t != null) {
-            t.getPlayer().score += val;
+            t.getPlayer().changeScore(val);
         }
         if (this.power > this.health) {
             this.power = this.health;
         }
+    }
+
+    public void repair() {
+        this.health += 20;
+        if (this.health > 100) {
+            this.health = 100;
+        }
+    }
+
+    public void addFuel() {
+        this.fuel += 200;
+    }
+
+    public void addParachute() {
+        this.parachutes += 1;
     }
 
     public void fire(int wind) {
@@ -190,7 +200,6 @@ public class Tank {
         app.popMatrix();
 
         // Base
-        app.rectMode(3);
         app.fill(color[0], color[1], color[2]);
         app.rect(x, y - (float) (BASE_HEIGHT * 0.5), BASE_WIDTH, BASE_HEIGHT,
                 BORDER_RADIUS);

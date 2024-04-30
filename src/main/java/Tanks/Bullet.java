@@ -2,10 +2,11 @@ package Tanks;
 
 public class Bullet {
     private static float GRAVITY = 3.6f;
+    private static Column[] columns;
     private Tank tank;
     private int bulletIdx;
     private ExplodeAnimation explodeAnimation;
-    private float x, y, deg;
+    private float x, y;
     private float velocity = 1;
     private int wind;
     private int[] color;
@@ -14,12 +15,16 @@ public class Bullet {
     private boolean display = false;
     private int dummy = 12;
 
-    public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind, int[] color) {
+    public static void setCol(Column[] col) {
+        columns = col;
+    }
+
+    public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind,
+            int[] color) {
         this.tank = tank;
         this.bulletIdx = bulletIdx;
         this.x = (float) (x + 10 * Math.tan(deg));
         this.y = y - 10;
-        this.deg = deg;
         this.wind = wind;
         this.velocity = power;
         this.xChange = this.velocity * Math.tan(deg);
@@ -104,11 +109,11 @@ public class Bullet {
             }
         }
 
-        if (this.moving && this.y >= 640 - app.getColumns()[Math.round(this.x)].getY()) {
+        if (this.moving && this.y >= 640 - columns[Math.round(this.x)].getY()) {
             this.moving = false;
             this.display = true;
             this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
-            explode(app.getColumns(), Math.round(this.x), app.getColumns()[Math.round(this.x)].getY());
+            explode(columns, Math.round(this.x), columns[Math.round(this.x)].getY());
         }
     }
 }
