@@ -4,15 +4,17 @@ public class Bullet {
     private static float GRAVITY = 3.6f;
     private static Column[] columns;
     private Tank tank;
-    private int bulletIdx;
-    private ExplodeAnimation explodeAnimation;
     private float x, y;
+    private int bulletIdx;
+    private int[] color;
+
     private float velocity = 1;
     private int wind;
-    private int[] color;
     private final double xChange;
+
     private boolean moving = true;
-    private boolean display = false;
+    private boolean explode = false;
+    private ExplodeAnimation explodeAnimation;
     private int dummy = 12;
 
     public static void setCol(Column[] col) {
@@ -22,24 +24,24 @@ public class Bullet {
     public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind,
             int[] color) {
         this.tank = tank;
-        this.bulletIdx = bulletIdx;
         this.x = (float) (x + 10 * Math.tan(deg));
         this.y = y - 10;
+        this.bulletIdx = bulletIdx;
+        this.color = color;
         this.wind = wind;
         this.velocity = power;
         this.xChange = this.velocity * Math.tan(deg);
-        this.color = color;
     }
 
-    public int calculateDistance(int x1, int x2, int y1, int y2) {
+    public static int calculateDistance(int x1, int x2, int y1, int y2) {
         return (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
-    public int calculateHeightDiff(int diff_x) {
+    public static int calculateHeightDiff(int diff_x) {
         return (int) Math.floor(Math.sqrt(Math.pow(30, 2) - Math.pow(diff_x, 2)));
     }
 
-    public void calculateHeightLoss(Column col, int height_origin, int height_diff) {
+    public static void calculateHeightLoss(Column col, int height_origin, int height_diff, Tank t) {
         int val = 0;
         if (col.getY() >= height_origin + height_diff) {
             val = (int) Math.round(2 * height_diff);
@@ -51,11 +53,11 @@ public class Bullet {
 
         col.decreseY(val);
         if (col.getTank() != null) {
-            Tank t = col.getTank();
-            if (t.getParachutes() > 0) {
-                t.useParachutes();
-            } else if (t != this.tank) {
-                t.changeHealth(val, this.tank);
+            Tank t1 = col.getTank();
+            if (t1.getParachutes() > 0) {
+                t1.useParachutes();
+            } else if (t1 != t) {
+                t1.changeHealth(val, t);
             }
         }
 
@@ -77,7 +79,7 @@ public class Bullet {
 
                 }
             }
-            calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin));
+            calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin), this.tank);
         }
 
     }
@@ -95,14 +97,13 @@ public class Bullet {
         }
         if (this.x <= 0 || Math.round(this.x) >= 864 || this.y <= 0 || this.y >= 640) {
             this.moving = false;
-            this.display = false;
         }
         if (this.moving) {
             app.fill(color[0], color[1], color[2]);
             app.ellipse(x, y, 7, 7);
         }
 
-        if (this.display) {
+        if (this.explode) {
             boolean finish = explodeAnimation.draw(app);
             if (finish) {
                 tank.deleteBullet(bulletIdx);
@@ -111,7 +112,7 @@ public class Bullet {
 
         if (this.moving && this.y >= 640 - columns[Math.round(this.x)].getY()) {
             this.moving = false;
-            this.display = true;
+            this.explode = true;
             this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
             explode(columns, Math.round(this.x), columns[Math.round(this.x)].getY());
         }

@@ -2,28 +2,23 @@ package Tanks;
 
 public class Column {
     private int x, y;
-    private Tree tree;
     private Tank tank;
 
     public Column(int x, int y) {
         this.x = x;
-        this.y = y; // height
+        this.y = y;
     }
 
     public int getX() {
         return this.x;
     }
 
-    public void decreseY(int val) {
-        this.y -= val;
-    }
-
     public int getY() {
         return this.y;
     }
 
-    public void addTree(Tree tree) {
-        this.tree = tree;
+    public void decreseY(int val) {
+        this.y -= val;
     }
 
     public Tank getTank() {
@@ -31,6 +26,9 @@ public class Column {
     }
 
     public void setTank(Tank tank) {
+        if (tank != null && this.tank != null) {
+            return;
+        }
         this.tank = tank;
     }
 

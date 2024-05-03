@@ -17,7 +17,7 @@ public class Tank {
     private int[] color;
     private ExplodeAnimation explodeAnimation;
     private boolean display;
-    private boolean deleted = false;
+    private boolean deleted;
     private static PImage parachuteImg;
     private static float BASE_WIDTH = 25;
     private static float BASE_HEIGHT = 5;
@@ -35,6 +35,7 @@ public class Tank {
         this.fuel = 250;
         this.power = 50;
         this.parachutes = 3;
+        this.deleted = false;
     }
 
     public static void setParachuteImg(PImage img) {

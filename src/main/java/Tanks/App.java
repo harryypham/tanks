@@ -258,7 +258,6 @@ public class App extends PApplet {
             columns[i] = new Column(i, tempColumn[i]);
             if (tempTree[i] == 1) {
                 trees[i] = new Tree(columns[i]);
-                columns[i].addTree(trees[i]);
             }
             if (Character.isLetter(tempTank[i])) {
                 Player player;
