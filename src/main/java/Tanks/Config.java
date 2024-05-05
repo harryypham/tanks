@@ -8,12 +8,31 @@ import processing.data.JSONArray;
 import processing.data.JSONObject;
 
 public class Config {
+    /**
+     * JSONObject extracted from the config file.
+     */
     private JSONObject json;
+
+    /**
+     * JSONObject containing the settings for levels.
+     */
     private JSONObject[] levels;
+
+    /**
+     * JSONObject containing the settings of the player.s
+     */
     private JSONObject playerObject;
+
     private int currentLevel;
     private App app;
 
+    /**
+     * Constructor.
+     * 
+     * @param json  JSONObject extracted from the config file.
+     * @param app   The main application.
+     * @param level An integer representing the current level.
+     */
     public Config(JSONObject json, App app, int level) {
         this.json = json;
         this.currentLevel = level;
@@ -22,6 +41,9 @@ public class Config {
         initPlayerColors();
     }
 
+    /**
+     * Initialize the levels. Load the levels into an array of JSONObject.
+     */
     private void initLevels() {
         JSONArray tempArr = json.getJSONArray("levels");
         this.levels = new JSONObject[tempArr.size()];
@@ -30,20 +52,38 @@ public class Config {
         }
     }
 
+    /**
+     * Initialize the players.
+     */
     private void initPlayerColors() {
         this.playerObject = json.getJSONObject("player_colours");
     }
 
+    /**
+     * Retrieve the number of levels in the game.
+     * 
+     * @return An integer representing how many levels the game has.
+     */
     public int getNumLevels() {
         return this.levels.length;
     }
 
+    /**
+     * Get the layout file for the current level.
+     * 
+     * @return A File containing the terrain, trees and tanks of the current level.
+     */
     public File getLayoutFile() {
         String filename = this.levels[this.currentLevel].getString("layout");
         File file = new File(filename);
         return file;
     }
 
+    /**
+     * Get the background image.
+     * 
+     * @return A PImage.
+     */
     public PImage getBackground() {
         String backgroundImgPath = "build/resources/main/Tanks/"
                 + this.levels[this.currentLevel].getString("background");
@@ -51,18 +91,33 @@ public class Config {
         return backgroundImg;
     }
 
+    /**
+     * Get the parachute's image.
+     * 
+     * @return A PImage.
+     */
     public PImage getParachuteImage() {
         String imgPath = "build/resources/main/Tanks/parachute.png";
         PImage parachuteImg = app.loadImage(imgPath);
         return parachuteImg;
     }
 
+    /**
+     * Get the fuel's image.
+     * 
+     * @return A PImage.
+     */
     public PImage getFuelImage() {
         String fuelImgPath = "build/resources/main/Tanks/fuel.png";
         PImage fuelImg = app.loadImage(fuelImgPath);
         return fuelImg;
     }
 
+    /**
+     * Get the trees' image.
+     * 
+     * @return A PImage.
+     */
     public PImage getTreeImage() {
         String treeImgPath;
         if (this.levels[this.currentLevel].getString("trees") == null) {
@@ -75,18 +130,33 @@ public class Config {
         return treeImg;
     }
 
+    /**
+     * Get the positive wind's image.
+     * 
+     * @return A PImage.
+     */
     public PImage getPosWindImg() {
         String windImgPath = "build/resources/main/Tanks/wind.png";
         PImage windImg = app.loadImage(windImgPath);
         return windImg;
     }
 
+    /**
+     * Get the negative wind's image.
+     * 
+     * @return A PImage.
+     */
     public PImage getNegWindImg() {
         String windImgPath = "build/resources/main/Tanks/wind-1.png";
         PImage windImg = app.loadImage(windImgPath);
         return windImg;
     }
 
+    /**
+     * Get the foreground color.
+     * 
+     * @return An integer array of length 3 representing the foreground color.
+     */
     public int[] getForegroundColor() {
         String temp = this.levels[this.currentLevel].getString("foreground-colour");
         String[] tempColors = temp.split(",", -1);
@@ -95,6 +165,11 @@ public class Config {
         return colors;
     }
 
+    /**
+     * Initialize the players' color.
+     * 
+     * @return A map mapping the player's name to the player's color.
+     */
     public Map<Character, int[]> getPlayerColors() {
         Map<Character, int[]> playerColor = new HashMap<Character, int[]>();
         Iterator<?> iter = playerObject.keys().iterator();
@@ -119,6 +194,11 @@ public class Config {
         return playerColor;
     }
 
+    /**
+     * Load layout (terrain, tanks, trees) from the layout file.
+     * 
+     * @return An object containing the layout of the columns, trees and tanks.
+     */
     public Object[] loadLayout() {
         File file = getLayoutFile();
         Object[] re = new Object[3];

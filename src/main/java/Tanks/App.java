@@ -4,26 +4,17 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONObject;
 import processing.event.KeyEvent;
-import processing.event.MouseEvent;
 
 import java.util.*;
 
 public class App extends PApplet {
 
-    public static final int CELLSIZE = 32; // 8;
-    public static final int CELLHEIGHT = 32;
-
-    public static final int CELLAVG = 32;
-    public static final int TOPBAR = 0;
-    public static int WIDTH = 864; // CELLSIZE*BOARD_WIDTH;
-    public static int HEIGHT = 640; // BOARD_HEIGHT*CELLSIZE+TOPBAR;
-    public static final int BOARD_WIDTH = WIDTH / CELLSIZE;
-    public static final int BOARD_HEIGHT = 20;
-
-    public static final int INITIAL_PARACHUTES = 1;
-
+    // App settings
+    public static int WIDTH = 864;
+    public static int HEIGHT = 640;
     public static final int FPS = 30;
 
+    // Keycode
     public static final int BACKSPACE = 32;
     public static final int UP = 38;
     public static final int LEFT = 37;
@@ -35,6 +26,7 @@ public class App extends PApplet {
     public static final int R = 82;
     public static final int P = 80;
 
+    // Path of config file
     public String configPath;
 
     // Additional attributes
@@ -59,9 +51,6 @@ public class App extends PApplet {
 
     private boolean endgame = false;
 
-    // Feel free to add any additional methods or attributes you want. Please put
-    // classes in different files.
-
     public App() {
         this.configPath = "config.json";
     }
@@ -75,8 +64,7 @@ public class App extends PApplet {
     }
 
     /**
-     * Load all resources such as images. Initialise the elements such as the player
-     * and map elements.
+     * Load all resources (terrain, trees, tanks, ...)
      */
     @Override
     public void setup() {
@@ -111,6 +99,8 @@ public class App extends PApplet {
 
     /**
      * Receive key pressed signal from the keyboard.
+     * 
+     * @param event A KeyEvent specifying which key the user just pressed.
      */
     @Override
     public void keyPressed(KeyEvent event) {
@@ -181,25 +171,6 @@ public class App extends PApplet {
     }
 
     /**
-     * Receive key released signal from the keyboard.
-     */
-    @Override
-    public void keyReleased() {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        // TODO - powerups, like repair and extra fuel and teleport
-        // currentPlayer = players.get(currentPlayer).getNextPlayer();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    /**
      * Draw all elements in the game by current frame.
      */
     @Override
@@ -228,7 +199,11 @@ public class App extends PApplet {
     /*
      * Below are helper functions.
      */
-    public void nextPlayer() {
+
+    /**
+     * End the current turn. Move to the next player.
+     */
+    private void nextPlayer() {
         if (playersLeft == 0) {
             return;
         }
@@ -239,11 +214,20 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Get player's index in the array given the name of the player.
+     * 
+     * @param key A character representing the name of the player.
+     * @return The player's index
+     */
     private int findPlayerIdx(char key) {
         List<Character> list = Arrays.asList(playersTurn);
         return list.indexOf(key);
     }
 
+    /**
+     * Set up the terrain, trees, tanks.
+     */
     private void initializeEnv() {
         Object[] temp = config.loadLayout();
         Map<Character, int[]> playersColor = config.getPlayerColors();
@@ -276,6 +260,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Set up the players.
+     */
     private void initializePlayers() {
         Object[] tempArr = players.keySet().toArray();
         playersTurn = new Character[tempArr.length];
@@ -287,6 +274,9 @@ public class App extends PApplet {
         playersLeft = playersTurn.length;
     }
 
+    /**
+     * Display the terrain on screen.
+     */
     private void drawTerrain() {
         // draw columns
         for (int c = 0; c < 864; c++) {
@@ -301,6 +291,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Display the tanks on screen.
+     */
     private void drawTanks() {
         for (Map.Entry<Character, Tank> entry : tanks.entrySet()) {
             Character key = entry.getKey();
@@ -325,10 +318,17 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Display the wind on screen.
+     */
     private void drawWind() {
         wind.draw(this);
     }
 
+    /**
+     * Display current player's information (tank's health, power, parachutes) on
+     * screen.
+     */
     private void drawCurrentPlayerStats() {
         Tank t = tanks.get(currentPlayer);
         if (t == null) {
@@ -380,6 +380,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Display the scoreboard on screen.
+     */
     private void drawScoreboard() {
         fill(0, 1);
         stroke(0);
@@ -401,6 +404,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Check if game has ended.
+     */
     private void checkEndgame() {
         if (playersLeft <= 1) {
             if (this.level == totalLevels - 1) {
@@ -412,6 +418,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * End the game.
+     */
     private void endGame() {
         List<Player> sortedPlayers = new ArrayList<>(players.values());
         Collections.sort(sortedPlayers);
