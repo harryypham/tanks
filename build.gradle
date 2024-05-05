@@ -54,3 +54,8 @@ jar {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     }
 }
+
+javadoc {
+    source = sourceSets.main.allJava
+    destinationDir = file("${buildDir}/docs/javadoc")
+}

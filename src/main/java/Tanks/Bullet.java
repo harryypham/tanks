@@ -1,26 +1,63 @@
 package Tanks;
 
-public class Bullet {
+public class Bullet extends GameComponent {
+    /**
+     * Class variable.
+     */
     private static float GRAVITY = 3.6f;
     private static Column[] columns;
+
+    // The tank that shot this bullet.
     private Tank tank;
+
+    // Position of the bullet.
     private float x, y;
+
+    // The index of this bullet in the array of bullets that the tank has shot.
     private int bulletIdx;
+
+    // Color of the bullet (same as the color of the player).
     private int[] color;
 
-    private float velocity = 1;
-    private int wind;
-    private final double xChange;
+    // Velocity
+    private float xChange;
+    private float yChange = 1;
 
+    // Wind's value
+    private int wind;
+
+    // Whether bullet is still flying
     private boolean moving = true;
+
+    // Whether bullet has hit terrain and explode
     private boolean explode = false;
+
     private ExplodeAnimation explodeAnimation;
     private int dummy = 12;
 
+    /**
+     * Set the terrain of the game.
+     * 
+     * @param col Arrays of columns representing the terrain of the game.
+     */
     public static void setCol(Column[] col) {
         columns = col;
     }
 
+    /**
+     * Constructor for a bullet.
+     * 
+     * @param tank      The tank that shot this bullet.
+     * @param bulletIdx An integer representing the index of this bullet in the
+     *                  array of bullets that the tank has shot.
+     * @param x         A float representing the X-coordinate of the bullet.
+     * @param y         A float representing the Y-coordinate of the bullet.
+     * @param deg       A float representing the degree of the tank's turret.
+     * @param power     A float representing the power of the tank.
+     * @param wind      An integer representing the value of the wind at the time
+     *                  the bullet is shot.
+     * @param color     An integer array containing the color of the bullet.
+     */
     public Bullet(Tank tank, int bulletIdx, float x, float y, float deg, float power, int wind,
             int[] color) {
         this.tank = tank;
@@ -29,19 +66,46 @@ public class Bullet {
         this.bulletIdx = bulletIdx;
         this.color = color;
         this.wind = wind;
-        this.velocity = power;
-        this.xChange = this.velocity * Math.tan(deg);
+        this.yChange = power;
+        this.xChange = (float) (power * Math.tan(deg));
     }
 
+    /**
+     * Calculate the Euclidean distance between 2 points.
+     * 
+     * @param x1 An integer representing the x-coordinate of point 1.
+     * @param x2 An integer representing the x-coordinate of point 2.
+     * @param y1 An integer representing the y-coordinate of point 1.
+     * @param y2 An integer representing the y-coordinate of point 2.
+     * @return An integer representing the distance.
+     */
     public static int calculateDistance(int x1, int x2, int y1, int y2) {
         return (int) Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
+    /**
+     * Calculate how many pixels (terrain) are in the explosion given that a column
+     * is diff_x from the explosion's center.
+     * 
+     * @param diff_x An integer representing the distance from the explosion's
+     *               center.
+     * @return An integer representing how many pixels loss.
+     */
     public static int calculateHeightDiff(int diff_x) {
         return (int) Math.floor(Math.sqrt(Math.pow(30, 2) - Math.pow(diff_x, 2)));
     }
 
-    public static void calculateHeightLoss(Column col, int height_origin, int height_diff, Tank t) {
+    /**
+     * Change the height of a column and reduce tank's health if hit.
+     * 
+     * @param col           A column within the proximity of the explosion.
+     * @param height_origin An integer representing the y-coordinate of the
+     *                      explosion's center.
+     * @param height_diff   An integer representing how many pixels that the column
+     *                      suppose to lose.
+     * @param t             The tank that shot the bullet.
+     */
+    public static void changeHeight(Column col, int height_origin, int height_diff, Tank t) {
         int val = 0;
         if (col.getY() >= height_origin + height_diff) {
             val = (int) Math.round(2 * height_diff);
@@ -63,7 +127,15 @@ public class Bullet {
 
     }
 
-    public void explode(Column[] columns, int x_origin, int y_origin) {
+    /**
+     * Calculate all the explosion damage.
+     * 
+     * @param x_origin An integer representing the x-coordinate of the explosion's
+     *                 center.
+     * @param y_origin An integer representing the y-coordinate of the explosion's
+     *                 center.
+     */
+    public void explode(int x_origin, int y_origin) {
         for (int i = x_origin - 30; i <= x_origin + 30; i++) {
             if (i < 0 || i >= 864) {
                 continue;
@@ -79,20 +151,25 @@ public class Bullet {
 
                 }
             }
-            calculateHeightLoss(columns[i], y_origin, calculateHeightDiff(i - x_origin), this.tank);
+            changeHeight(columns[i], y_origin, calculateHeightDiff(i - x_origin), this.tank);
         }
 
     }
 
+    /**
+     * Display the bullet on screen.
+     * 
+     * @param app The main application to draw on.
+     */
     public void draw(App app) {
         if (this.moving) {
-            y -= velocity;
             x += xChange;
+            y -= yChange;
             if (this.dummy > 0) {
                 this.dummy -= 1;
             } else {
                 x += wind * 0.03 / 30;
-                velocity -= GRAVITY / 30;
+                yChange -= GRAVITY / 30;
             }
         }
         if (this.x <= 0 || Math.round(this.x) >= 864 || this.y <= 0 || this.y >= 640) {
@@ -114,7 +191,7 @@ public class Bullet {
             this.moving = false;
             this.explode = true;
             this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
-            explode(columns, Math.round(this.x), columns[Math.round(this.x)].getY());
+            explode(Math.round(this.x), columns[Math.round(this.x)].getY());
         }
     }
 }

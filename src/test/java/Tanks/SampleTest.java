@@ -141,7 +141,7 @@ public class SampleTest {
         d = Bullet.calculateHeightDiff(28);
         assertEquals(d, 10);
 
-        Bullet.calculateHeightLoss(col, 200, 180, t);
+        Bullet.changeHeight(col, 200, 180, t);
     }
 
     @Test
@@ -160,16 +160,15 @@ public class SampleTest {
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 70));
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 80));
-        boolean k = true;
-        for (int i = 0; i < App.FPS * 20; i++) {
-            if (k && i == App.FPS * 2) {
-                app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 40));
-            }
+
+        app.noLoop();
+        for (int i = 0; i < App.FPS * 40; i++) {
             if (i % App.FPS == 0) {
                 app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 32));
             }
             app.draw();
         }
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
 
     }
 }

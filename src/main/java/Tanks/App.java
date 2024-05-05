@@ -1,6 +1,5 @@
 package Tanks;
 
-import org.checkerframework.checker.units.qual.A;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONObject;
@@ -123,57 +122,57 @@ public class App extends PApplet {
             this.setup();
         }
 
-        if (event.getKeyCode() == LEFT) {
+        if (!endgame && event.getKeyCode() == LEFT) {
             if (t.getFuel() > 0) {
                 Column new_col = columns[t.getX() - 2];
                 t.changeCol(new_col);
             }
         }
 
-        if (event.getKeyCode() == RIGHT) {
+        if (!endgame && event.getKeyCode() == RIGHT) {
             if (t.getFuel() > 0) {
                 Column new_col = columns[t.getX() + 2];
                 t.changeCol(new_col);
             }
         }
 
-        if (event.getKeyCode() == UP) {
+        if (!endgame && event.getKeyCode() == UP) {
             t.changeDeg((float) 0.1);
         }
 
-        if (event.getKeyCode() == DOWN) {
+        if (!endgame && event.getKeyCode() == DOWN) {
             t.changeDeg((float) -0.1);
         }
 
-        if (event.getKeyCode() == W) {
+        if (!endgame && event.getKeyCode() == W) {
             t.changePower((float) 1.2);
         }
 
-        if (event.getKeyCode() == S) {
+        if (!endgame && event.getKeyCode() == S) {
             t.changePower((float) -1.2);
         }
 
-        if (event.getKeyCode() == BACKSPACE) {
+        if (!endgame && event.getKeyCode() == BACKSPACE) {
             t.fire(wind.getWind());
             nextPlayer();
             wind.changeWind();
         }
 
         if (!endgame && event.getKeyCode() == R) {
-            if (p.getScore() >= 20) {
+            if (p.getScore() >= 20 && t.getHealth() < 100) {
                 t.repair();
                 p.changeScore(-20);
             }
         }
 
-        if (event.getKeyCode() == F) {
+        if (!endgame && event.getKeyCode() == F) {
             if (p.getScore() >= 10) {
                 t.addFuel();
                 p.changeScore(-10);
             }
         }
 
-        if (event.getKeyCode() == P) {
+        if (!endgame && event.getKeyCode() == P) {
             if (p.getScore() >= 15) {
                 t.addParachute();
                 p.changeScore(-15);

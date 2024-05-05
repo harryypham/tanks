@@ -2,7 +2,7 @@ package Tanks;
 
 import processing.core.PImage;
 
-public class Tank {
+public class Tank extends GameComponent {
     private Column col;
     private int x, y;
     private float turretAngle = 0;
@@ -18,6 +18,7 @@ public class Tank {
     private ExplodeAnimation explodeAnimation;
     private boolean display;
     private boolean deleted;
+
     private static PImage parachuteImg;
     private static float BASE_WIDTH = 25;
     private static float BASE_HEIGHT = 5;
