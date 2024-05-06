@@ -3,22 +3,7 @@ package Tanks;
 import processing.core.PImage;
 
 public class Tank extends GameComponent {
-    private Column col;
-    private int x, y;
-    private float turretAngle = 0;
-    private int health;
-    private int fuel;
-    private int power;
-    private int parachutes;
-    private boolean useParachute;
-    private Bullet[] bullets = new Bullet[100];
-    private int numBullets = 0;
-    private Player player;
-    private int[] color;
-    private ExplodeAnimation explodeAnimation;
-    private boolean display;
-    private boolean deleted;
-
+    // Class variables
     private static PImage parachuteImg;
     private static float BASE_WIDTH = 25;
     private static float BASE_HEIGHT = 5;
@@ -26,6 +11,41 @@ public class Tank extends GameComponent {
     private static float TURRET_HEIGHT = 20;
     private static float BORDER_RADIUS = 10;
 
+    // Column this tank belongs to.
+    private Column col;
+
+    // Position of the tank.
+    private int x, y;
+
+    // Tank's attributes
+    private float turretAngle = 0;
+    private int health;
+    private int fuel;
+    private int power;
+    private int parachutes;
+    private int[] color;
+
+    // Whether the tank is descending with a parachute.
+    private boolean useParachute;
+
+    // An array storing the bullets the tank has fired
+    private Bullet[] bullets = new Bullet[100];
+    private int numBullets = 0;
+
+    // Player this tank belongs to
+    private Player player;
+
+    // Whether tank has been destroyed.
+    private ExplodeAnimation explodeAnimation;
+    private boolean display;
+    private boolean deleted;
+
+    /**
+     * Constructor for a tank.
+     * 
+     * @param col    Column the tank belongs to.
+     * @param player Player the tank belongs to.
+     */
     public Tank(Column col, Player player) {
         this.player = player;
         this.color = player.getColor();
@@ -39,59 +59,128 @@ public class Tank extends GameComponent {
         this.deleted = false;
     }
 
+    /**
+     * Set the parachute's image.
+     * 
+     * @param img A Pimage.
+     */
     public static void setParachuteImg(PImage img) {
         parachuteImg = img;
     }
 
+    /**
+     * Get the x-coordinate of the tank.
+     * 
+     * @return An integer representing the x-coordinate of the tank.
+     */
     public int getX() {
         return this.col.getX();
     }
 
+    /**
+     * Get the y-coordinate of the tank.
+     * 
+     * @return An integer representing the y-coordinate of the tank.
+     */
     public int getY() {
         return this.col.getY();
     }
 
+    /**
+     * Delete bullet that has hit terrain or fly outside of screen.
+     * 
+     * @param bulletIdx An integer representing the index of the bullet in the
+     *                  array.
+     */
     public void deleteBullet(int bulletIdx) {
         bullets[bulletIdx] = null;
     }
 
+    /**
+     * Get the column that the tank belongs to.
+     * 
+     * @return A column.
+     */
     public Column getCol() {
         return this.col;
     }
 
+    /**
+     * Get the player that the tank belongs to.
+     * 
+     * @return A player.
+     */
     public Player getPlayer() {
         return this.player;
     }
 
+    /**
+     * Get how many fuel tank has left.
+     *
+     * @return An integer representing the amount of fuel left.
+     */
     public int getFuel() {
         return this.fuel;
     }
 
+    /**
+     * Get the tank's health.
+     * 
+     * @return An integer representing the tank's health.
+     */
     public int getHealth() {
         return this.health;
     }
 
+    /**
+     * Get the tank's power.
+     * 
+     * @return An integer representing the tank's power.
+     */
     public int getPower() {
         return this.power;
     }
 
+    /**
+     * Get the number of parachutes the tank has left.
+     * 
+     * @return An integer representing how many parachutes the tank has left.
+     */
     public int getParachutes() {
         return this.parachutes;
     }
 
+    /**
+     * Whether the tank get displayed.
+     * 
+     * @return A boolean indicating whether the tank is displayed.
+     */
     public boolean getDisplay() {
         return this.display;
     }
 
+    /**
+     * Check if the tank has been deleted.
+     * 
+     * @return A boolean indicating whether the tank has been deleted.
+     */
     public boolean checkDeleted() {
         return this.deleted;
     }
 
+    /**
+     * Use the parachute.
+     */
     public void useParachutes() {
         this.parachutes -= 1;
         this.useParachute = true;
     }
 
+    /**
+     * Change the column the tank belongs to.
+     * 
+     * @param c The updated column.
+     */
     public void changeCol(Column c) {
         this.fuel -= 2;
         this.col.setTank(null);
@@ -101,10 +190,20 @@ public class Tank extends GameComponent {
         this.y = 642 - c.getY();
     }
 
+    /**
+     * Change the turret degree.
+     * 
+     * @param deg A float representing the angle the turret should turn (clockwise).
+     */
     public void changeDeg(float deg) {
         this.turretAngle += deg;
     }
 
+    /**
+     * Change the tank's power.
+     * 
+     * @param pow A float representing how many power to add.
+     */
     public void changePower(float pow) {
         this.power += pow;
         if (this.power > 100) {
@@ -118,6 +217,12 @@ public class Tank extends GameComponent {
         }
     }
 
+    /**
+     * Change the tank's health.
+     * 
+     * @param health An integer representing how many health the tank lose.
+     * @param t      The tank that cause the damage.
+     */
     public void changeHealth(int health, Tank t) {
         int val = health;
         if (this.health < health) {
@@ -132,6 +237,9 @@ public class Tank extends GameComponent {
         }
     }
 
+    /**
+     * Repair the tank.
+     */
     public void repair() {
         this.health += 20;
         if (this.health > 100) {
@@ -139,14 +247,25 @@ public class Tank extends GameComponent {
         }
     }
 
+    /**
+     * Add fuel.
+     */
     public void addFuel() {
         this.fuel += 200;
     }
 
+    /**
+     * Add parachute.
+     */
     public void addParachute() {
         this.parachutes += 1;
     }
 
+    /**
+     * Fire a bullet.
+     * 
+     * @param wind An integer representing the value of wind.
+     */
     public void fire(int wind) {
         Bullet bullet = new Bullet(this, numBullets, col.getX(), 642 - col.getY(), (float) turretAngle,
                 (float) (power / 12.5 + 1),
@@ -155,6 +274,9 @@ public class Tank extends GameComponent {
         numBullets += 1;
     }
 
+    /**
+     * Delete the tank from the game.
+     */
     public void deleteTankFromGame() {
         this.col.setTank(null);
         this.player.setTank(null);
@@ -163,7 +285,15 @@ public class Tank extends GameComponent {
         this.deleted = true;
     }
 
+    /**
+     * Display the tank on scren.
+     * 
+     * @param app The main application to draw on.
+     */
     public void draw(App app) {
+        if (this.y <= 2) {
+            deleteTankFromGame();
+        }
         for (Bullet bullet : bullets) {
             if (bullet != null) {
                 bullet.draw(app);

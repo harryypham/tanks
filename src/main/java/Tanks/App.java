@@ -301,7 +301,7 @@ public class App extends PApplet {
             if (tank == null) {
                 continue;
             }
-            if (tank.getHealth() > 0) {
+            if (tank.getHealth() > 0 && tank.getY() > 0) {
                 tank.draw(this);
             } else {
                 if (!tank.checkDeleted()) {

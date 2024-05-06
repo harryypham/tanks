@@ -172,7 +172,7 @@ public class Bullet extends GameComponent {
                 yChange -= GRAVITY / 30;
             }
         }
-        if (this.x <= 0 || Math.round(this.x) >= 864 || this.y <= 0 || this.y >= 640) {
+        if (this.x <= 0 || Math.round(this.x) >= 864 || this.y <= 0 || this.y >= 650) {
             this.moving = false;
         }
         if (this.moving) {

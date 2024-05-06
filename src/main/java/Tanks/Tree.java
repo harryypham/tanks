@@ -9,7 +9,12 @@ public class Tree extends GameComponent {
     private static PImage treeImg;
 
     /**
-     * Position of the tree
+     * Column the tree belongs to.
+     */
+    private Column col;
+
+    /**
+     * Position of the tree.
      */
     private int x, y;
 
@@ -19,6 +24,7 @@ public class Tree extends GameComponent {
      * @param col Column that the tree belongs to.
      */
     public Tree(Column col) {
+        this.col = col;
         this.x = col.getX();
         this.y = 640 - col.getY();
     }
@@ -38,6 +44,7 @@ public class Tree extends GameComponent {
      * @param app The main application to draw on.
      */
     public void draw(App app) {
+        this.y = 640 - col.getY();
         app.image(treeImg, x - 16, y - 30, 32, 32);
     }
 

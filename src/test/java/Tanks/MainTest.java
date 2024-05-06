@@ -8,8 +8,11 @@ import processing.event.KeyEvent;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SampleTest {
+public class MainTest {
 
+    /**
+     * Test ExplodeAnimation class.
+     */
     @Test
     public void testExplodeAnimation() {
         App app = new App();
@@ -22,6 +25,9 @@ public class SampleTest {
         }
     }
 
+    /**
+     * Test Player class.
+     */
     @Test
     public void testPlayer() {
         int[] color = { 0, 0, 0 };
@@ -36,6 +42,9 @@ public class SampleTest {
         assertEquals(a.compareTo(b), 1);
     }
 
+    /**
+     * Test Column class.
+     */
     @Test
     public void testColumn() {
         Column col = new Column(200, 300);
@@ -55,6 +64,27 @@ public class SampleTest {
         assertEquals(col.getTank(), t);
     }
 
+    /**
+     * Test Tree class.
+     */
+    @Test
+    public void testTree() {
+        App app = new App();
+        app.loop();
+        PApplet.runSketch(new String[] { "App" }, app);
+        JSONObject json = app.loadJSONObject(app.configPath);
+        Config conf = new Config(json, app, 0);
+        PImage img = conf.getTreeImage();
+        Column c = new Column(400, 200);
+        Tree t = new Tree(c);
+        Tree.setImg(img);
+        t.draw(app);
+        // No testable method.
+    }
+
+    /**
+     * Test Wind class.
+     */
     @Test
     public void testWind() {
         App app = new App();
@@ -73,6 +103,9 @@ public class SampleTest {
         w.draw(app);
     }
 
+    /**
+     * Test Tank class.
+     */
     @Test
     public void testTank() {
         Column col = new Column(200, 300);
@@ -127,8 +160,14 @@ public class SampleTest {
         t.deleteBullet(0);
     }
 
+    /**
+     * Test Bullet class.
+     */
     @Test
     public void testBullet() {
+        App app = new App();
+        app.loop();
+        PApplet.runSketch(new String[] { "App" }, app);
         Column col = new Column(200, 300);
 
         int[] color = { 0, 0, 0 };
@@ -142,10 +181,23 @@ public class SampleTest {
         assertEquals(d, 10);
 
         Bullet.changeHeight(col, 200, 180, t);
+
+        // Random bullet.
+        Bullet b = new Bullet(t, 0, -10, 30, 1, 50, 20, color);
+
+        // Explode out of screen.
+        b.explode(10, 50);
+        b.explode(900, 50);
+
+        // Draw bullet.
+        b.draw(app);
     }
 
+    /**
+     * E2E Testing.
+     */
     @Test
-    public void testAppSetUp() {
+    public void testEndToEnd() {
         App app = new App();
         app.loop();
         PApplet.runSketch(new String[] { "App" }, app);
