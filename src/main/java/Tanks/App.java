@@ -25,6 +25,7 @@ public class App extends PApplet {
     public static final int F = 70;
     public static final int R = 82;
     public static final int P = 80;
+    public static final int H = 72;
 
     // Path of config file
     public String configPath;
@@ -168,6 +169,13 @@ public class App extends PApplet {
                 p.changeScore(-15);
             }
         }
+
+        if (!endgame && event.getKeyCode() == H) {
+            if (p.getScore() >= 20) {
+                t.useShield();
+                p.changeScore(-20);
+            }
+        }
     }
 
     /**
@@ -305,7 +313,7 @@ public class App extends PApplet {
                 tank.draw(this);
             } else {
                 if (!tank.checkDeleted()) {
-                    tank.deleteTankFromGame();
+                    tank.deleteTank();
                     playersTurn[findPlayerIdx(key)] = '#';
                     playersLeft -= 1;
                 }

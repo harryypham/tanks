@@ -38,10 +38,10 @@ public class Bullet extends GameComponent {
     /**
      * Set the terrain of the game.
      * 
-     * @param col Arrays of columns representing the terrain of the game.
+     * @param cols Arrays of columns representing the terrain of the game.
      */
-    public static void setCol(Column[] col) {
-        columns = col;
+    public static void setCol(Column[] cols) {
+        columns = cols;
     }
 
     /**
@@ -87,12 +87,12 @@ public class Bullet extends GameComponent {
      * Calculate how many pixels (terrain) are in the explosion given that a column
      * is diff_x from the explosion's center.
      * 
-     * @param diff_x An integer representing the distance from the explosion's
-     *               center.
+     * @param diff An integer representing the distance from the explosion's
+     *             center.
      * @return An integer representing how many pixels loss.
      */
-    public static int calculateHeightDiff(int diff_x) {
-        return (int) Math.floor(Math.sqrt(Math.pow(30, 2) - Math.pow(diff_x, 2)));
+    public static int calculateHeightDiff(int diff) {
+        return (int) Math.floor(Math.sqrt(Math.pow(30, 2) - Math.pow(diff, 2)));
     }
 
     /**

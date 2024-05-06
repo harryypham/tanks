@@ -116,18 +116,22 @@ public class MainTest {
         Player b = new Player('B', color);
         Tank t = new Tank(col, a);
         Tank t1 = new Tank(col1, b);
+
+        // Test getters
         assertEquals(t.getCol(), col);
         assertEquals(t.getX(), 200);
         assertEquals(t.getY(), 300);
         assertEquals(t.getPlayer(), a);
         assertEquals(t.getFuel(), 250);
 
+        // Test parachute-related methods.
         assertEquals(t.getParachutes(), 3);
         t.useParachutes();
         assertEquals(t.getParachutes(), 2);
         t.addParachute();
         assertEquals(t.getParachutes(), 3);
 
+        // Test power-related methods.
         assertEquals(t.getPower(), 50);
         t.changePower(15);
         assertEquals(t.getPower(), 65);
@@ -136,6 +140,7 @@ public class MainTest {
         t.changePower(-200);
         assertEquals(t.getPower(), 0);
 
+        // Test health-related methods.
         assertEquals(t.getHealth(), 100);
         t.changeHealth(30, t1);
         assertEquals(t.getHealth(), 70);
@@ -145,17 +150,24 @@ public class MainTest {
         t.changeHealth(120, t1);
         assertEquals(t.getHealth(), 0);
 
+        // Test repair.
         t1.repair();
         assertEquals(t1.getHealth(), 100);
 
+        // Test adding fuel.
         t1.addFuel();
         assertEquals(t1.getFuel(), 450);
 
+        // Test using shield.
+        t1.useShield();
+
+        // Test tank's display/existence.
         assertEquals(t.checkDeleted(), false);
-        t.deleteTankFromGame();
+        t.deleteTank();
         assertEquals(t.checkDeleted(), true);
         assertEquals(t.getDisplay(), true);
 
+        // Test firing method.
         t.fire(20);
         t.deleteBullet(0);
     }
@@ -174,6 +186,7 @@ public class MainTest {
         Player a = new Player('A', color);
         Tank t = new Tank(col, a);
 
+        // Test class methods.
         int d = Bullet.calculateDistance(5, 2, 4, 0);
         assertEquals(d, 5);
 
@@ -185,6 +198,7 @@ public class MainTest {
         // Random bullet.
         Bullet b = new Bullet(t, 0, -10, 30, 1, 50, 20, color);
 
+        // Test instance methods.
         // Explode out of screen.
         b.explode(10, 50);
         b.explode(900, 50);
@@ -194,7 +208,8 @@ public class MainTest {
     }
 
     /**
-     * E2E Testing.
+     * E2E Testing. Shooting hundreds of bullets to test changing levels and end
+     * game conditions.
      */
     @Test
     public void testEndToEnd() {
@@ -212,9 +227,10 @@ public class MainTest {
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 70));
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 80));
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 72));
 
         app.noLoop();
-        for (int i = 0; i < App.FPS * 40; i++) {
+        for (int i = 0; i < App.FPS * 60; i++) {
             if (i % App.FPS == 0) {
                 app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 32));
             }

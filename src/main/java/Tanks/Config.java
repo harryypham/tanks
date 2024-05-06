@@ -92,6 +92,19 @@ public class Config {
     }
 
     /**
+     * Get the foreground color.
+     * 
+     * @return An integer array of length 3 representing the foreground color.
+     */
+    public int[] getForegroundColor() {
+        String temp = this.levels[this.currentLevel].getString("foreground-colour");
+        String[] tempColors = temp.split(",", -1);
+        int[] colors = { Integer.parseInt(tempColors[0]), Integer.parseInt(tempColors[1]),
+                Integer.parseInt(tempColors[2]) };
+        return colors;
+    }
+
+    /**
      * Get the parachute's image.
      * 
      * @return A PImage.
@@ -150,19 +163,6 @@ public class Config {
         String windImgPath = "build/resources/main/Tanks/wind-1.png";
         PImage windImg = app.loadImage(windImgPath);
         return windImg;
-    }
-
-    /**
-     * Get the foreground color.
-     * 
-     * @return An integer array of length 3 representing the foreground color.
-     */
-    public int[] getForegroundColor() {
-        String temp = this.levels[this.currentLevel].getString("foreground-colour");
-        String[] tempColors = temp.split(",", -1);
-        int[] colors = { Integer.parseInt(tempColors[0]), Integer.parseInt(tempColors[1]),
-                Integer.parseInt(tempColors[2]) };
-        return colors;
     }
 
     /**

@@ -14,9 +14,6 @@ public class Tank extends GameComponent {
     // Column this tank belongs to.
     private Column col;
 
-    // Position of the tank.
-    private int x, y;
-
     // Tank's attributes
     private float turretAngle = 0;
     private int health;
@@ -27,6 +24,9 @@ public class Tank extends GameComponent {
 
     // Whether the tank is descending with a parachute.
     private boolean useParachute;
+
+    // Whether the tank is protected with a shield.
+    private boolean shield;
 
     // An array storing the bullets the tank has fired
     private Bullet[] bullets = new Bullet[100];
@@ -56,6 +56,7 @@ public class Tank extends GameComponent {
         this.fuel = 250;
         this.power = 50;
         this.parachutes = 3;
+        this.shield = false;
         this.deleted = false;
     }
 
@@ -84,16 +85,6 @@ public class Tank extends GameComponent {
      */
     public int getY() {
         return this.col.getY();
-    }
-
-    /**
-     * Delete bullet that has hit terrain or fly outside of screen.
-     * 
-     * @param bulletIdx An integer representing the index of the bullet in the
-     *                  array.
-     */
-    public void deleteBullet(int bulletIdx) {
-        bullets[bulletIdx] = null;
     }
 
     /**
@@ -177,6 +168,13 @@ public class Tank extends GameComponent {
     }
 
     /**
+     * Use the shield.
+     */
+    public void useShield() {
+        this.shield = true;
+    }
+
+    /**
      * Change the column the tank belongs to.
      * 
      * @param c The updated column.
@@ -224,6 +222,10 @@ public class Tank extends GameComponent {
      * @param t      The tank that cause the damage.
      */
     public void changeHealth(int health, Tank t) {
+        if (this.shield) {
+            this.shield = false;
+            return;
+        }
         int val = health;
         if (this.health < health) {
             val = this.health;
@@ -275,9 +277,19 @@ public class Tank extends GameComponent {
     }
 
     /**
+     * Delete bullet that has hit terrain or fly outside of screen.
+     * 
+     * @param idx An integer representing the index of the bullet in the
+     *            array.
+     */
+    public void deleteBullet(int idx) {
+        bullets[idx] = null;
+    }
+
+    /**
      * Delete the tank from the game.
      */
-    public void deleteTankFromGame() {
+    public void deleteTank() {
         this.col.setTank(null);
         this.player.setTank(null);
         this.explodeAnimation = new ExplodeAnimation(this.x, this.y);
@@ -292,7 +304,7 @@ public class Tank extends GameComponent {
      */
     public void draw(App app) {
         if (this.y <= 2) {
-            deleteTankFromGame();
+            deleteTank();
         }
         for (Bullet bullet : bullets) {
             if (bullet != null) {
@@ -339,6 +351,13 @@ public class Tank extends GameComponent {
                 BASE_HEIGHT,
                 BORDER_RADIUS);
 
+        if (this.shield) {
+            app.fill(0, 0);
+            app.stroke(color[0], color[1], color[2]);
+            app.ellipse(x, y - (float) (BASE_HEIGHT * 1.8), 35, 35);
+        }
+
+        app.noStroke();
         app.rectMode(0);
     }
 }

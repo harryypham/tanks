@@ -14,11 +14,6 @@ public class Tree extends GameComponent {
     private Column col;
 
     /**
-     * Position of the tree.
-     */
-    private int x, y;
-
-    /**
      * Constructor for a tree.
      * 
      * @param col Column that the tree belongs to.

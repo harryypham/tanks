@@ -13,12 +13,12 @@ public class Wind {
     /**
      * Image of wind when value is positve
      */
-    private static PImage img;
+    private static PImage windImg;
 
     /**
      * Image of wind when value is negative
      */
-    private static PImage rev_img;
+    private static PImage rev_windImg;
     private Random rand = new Random();
 
     /**
@@ -35,8 +35,8 @@ public class Wind {
      * @param image2 An image representing the wind when value is negative.
      */
     public static void setWindImg(PImage image1, PImage image2) {
-        img = image1;
-        rev_img = image2;
+        windImg = image1;
+        rev_windImg = image2;
     }
 
     /**
@@ -65,9 +65,9 @@ public class Wind {
     public void draw(App app) {
         PImage image;
         if (value >= 0) {
-            image = img;
+            image = windImg;
         } else {
-            image = rev_img;
+            image = rev_windImg;
         }
         app.image(image, 760, 0, 40, 40);
         app.fill(0, 0, 0);

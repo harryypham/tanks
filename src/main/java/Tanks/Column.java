@@ -1,10 +1,7 @@
 package Tanks;
 
 public class Column extends GameComponent {
-    /**
-     * X-coordinate and height of the column.
-     */
-    private int x, y;
+
     /**
      * Tank located on top of this column.
      */
