@@ -236,6 +236,8 @@ public class MainTest {
             }
             app.draw();
         }
+
+        // Test restart the game.
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
 
     }

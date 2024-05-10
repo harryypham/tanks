@@ -439,7 +439,7 @@ public class App extends PApplet {
         textSize(24);
         text(String.format("Player %c wins!", winner.getChar()), 390, 180);
 
-        fill(0, 1);
+        fill(color[0], color[1], color[2], 120);
         stroke(0);
         strokeWeight(4);
         rect(215, 200, 400, 170 + (playersTurn.length - 4) * 20);
