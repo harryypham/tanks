@@ -29,7 +29,7 @@ public class Tank extends GameComponent {
     private boolean shield;
 
     // An array storing the bullets the tank has fired
-    private Bullet[] bullets = new Bullet[100];
+    private Bullet[] bullets = new Bullet[200];
     private int numBullets = 0;
 
     // Player this tank belongs to

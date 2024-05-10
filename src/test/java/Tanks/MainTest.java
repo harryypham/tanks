@@ -8,6 +8,7 @@ import processing.event.KeyEvent;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+// IMPORTANT: Change how the wind affect the bullets in Bullet.java so the game ends faster. Line 172.
 public class MainTest {
 
     /**

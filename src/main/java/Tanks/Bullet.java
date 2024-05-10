@@ -168,7 +168,8 @@ public class Bullet extends GameComponent {
             if (this.dummy > 0) {
                 this.dummy -= 1;
             } else {
-                x += wind * 0.03 / 30;
+                // Change this to x when testing
+                xChange += wind * 0.03 / 30;
                 yChange -= GRAVITY / 30;
             }
         }

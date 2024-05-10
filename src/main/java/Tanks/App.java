@@ -51,6 +51,7 @@ public class App extends PApplet {
     private int playersLeft;
 
     private boolean endgame = false;
+    private int counter = 63;
 
     public App() {
         this.configPath = "config.json";
@@ -109,6 +110,7 @@ public class App extends PApplet {
         Tank t = tanks.get(currentPlayer);
         if (endgame && event.getKeyCode() == R) {
             endgame = false;
+            counter = 63;
             this.level = 0;
             this.setup();
         }
@@ -195,6 +197,7 @@ public class App extends PApplet {
 
         if (endgame) {
             endGame();
+            counter -= 1;
         } else {
             checkEndgame();
         }
@@ -448,7 +451,11 @@ public class App extends PApplet {
         line(215, 240, 615, 240);
 
         int y = 270;
-        for (Player p : sortedPlayers) {
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            if (3 - (counter / 21) < i) {
+                continue;
+            }
+            Player p = sortedPlayers.get(i);
             color = p.getColor();
             fill(color[0], color[1], color[2]);
             text(String.format("Player %c", p.getChar()), 315, y);
